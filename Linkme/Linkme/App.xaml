@@ -1,0 +1,10 @@
+﻿<Application x:Class="Linkme.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Linkme"
+             Startup="Application_Startup"
+             ShutdownMode="OnLastWindowClose">
+    <Application.Resources>
+        <ResourceDictionary Source="Views/ThemeDict.xaml"></ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,1 @@
+cmd /k "pushd E:\code_repository\link-live&&java -jar openapi-generator-cli.jar generate -i LinkServer/swagger.json -g typescript-axios -o linktv/linktv/src/LinkTV"

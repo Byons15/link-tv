@@ -1,0 +1,1 @@
+for %%i in (*.mp4) do ffmpeg -i "%%i" -vcodec h264_nvenc -acodec mp3 "%%i.flv"

@@ -1,0 +1,182 @@
+﻿<Window x:Class="Linkme.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Linkme"
+        xmlns:localViews="clr-namespace:Linkme.Views"
+        mc:Ignorable="d"
+        xmlns:WinFormHost="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:WinFormControls="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:cmd="clr-namespace:Linkme.Commands"
+        xmlns:viewmodels="clr-namespace:Linkme.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:Linkme}"
+        Title="MainWindow" Height="563.067" Width="1000.359">
+    <Window.DataContext>
+        <viewmodels:Linkme></viewmodels:Linkme>
+    </Window.DataContext>
+
+    <Window.Resources>
+
+        <!--素材按钮资源-->
+        <localViews:MaterialButtonData x:Key="VideoMaterialButton" IconSource="icons/video.png" Text="视频"></localViews:MaterialButtonData>
+        <localViews:MaterialButtonData x:Key="DesktopMaterialButton" IconSource="icons/desktop.png" Text="桌面"></localViews:MaterialButtonData>
+        <localViews:MaterialButtonData x:Key="CameraMaterialButton" IconSource="icons/camera.png" Text="摄像头"></localViews:MaterialButtonData>
+
+        <!--素材按钮数据模板-->
+        <DataTemplate x:Key="MaterialButtonDataTemplate" DataType="{x:Type localViews:MaterialButtonData}">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Image Source="{Binding IconSource}" Grid.Row="0"></Image>
+                <TextBlock Text="{Binding Text}" Grid.Row="1" Margin="0, 5, 0, 0" HorizontalAlignment="Center"></TextBlock>
+            </Grid>
+        </DataTemplate>
+
+        <Style TargetType="{x:Type Button}" x:Key="LiveButtonStyle">
+            <Setter Property="Visibility" Value="Visible"></Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Recording}" Value="False">
+                    <Setter Property="Visibility" Value="Visible"></Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Recording}" Value="True">
+                    <Setter Property="Visibility" Value="Hidden"></Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Background="{DynamicResource SecondaryTextColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="26*"/>
+            <RowDefinition Height="162*"/>
+            <RowDefinition Height="26*"/>
+            <RowDefinition Height="232*"/>
+            <RowDefinition Height="89"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="243"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <WindowsFormsHost Grid.Column="1" Grid.Row="0" x:Name="canvasViewManager" Grid.RowSpan="4">
+            <WinFormControls:Panel x:Name="canvasView" Paint="canvasView_Paint">
+            </WinFormControls:Panel>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Loaded">
+                    <cmd:EventCommand Command="{Binding CanvasViewLoadedCommand}" CommandParameter="{Binding ElementName=canvasView}"></cmd:EventCommand>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="SizeChanged">
+                    <cmd:EventCommand Command="{Binding CanvasViewResizeCommand}"></cmd:EventCommand>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <x:Code>
+                <![CDATA[
+                void canvasView_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+                {
+                    var vm = DataContext as ViewModels.Linkme;
+                    vm.CanvasViewPaint(canvasView);
+                }
+                ]]>
+            </x:Code>
+        </WindowsFormsHost>
+        <Label Content="场景" Foreground="{DynamicResource Secondary}"></Label>
+        <Button x:Name="recordButton" Grid.Column="1" HorizontalAlignment="Left" Margin="529,27,0,0" 
+                Grid.Row="4" VerticalAlignment="Top" Width="82" Height="31" Content="录制" 
+                Template="{DynamicResource ButtonTemplate2}"
+                Style="{StaticResource LiveButtonStyle}"
+                >
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Click">
+                    <cmd:EventCommand Command="{Binding BeginRecordCommand}"></cmd:EventCommand>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Button>
+        <Button x:Name="pushSteamButton" Grid.Column="1" 
+                HorizontalAlignment="Left" Margin="625,27,0,0" Grid.Row="4" 
+                VerticalAlignment="Top" Width="82" Height="31" Content="推流" 
+                Template="{DynamicResource ButtonTemplate1}"
+                Style="{StaticResource LiveButtonStyle}"
+                >
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Click">
+                    <cmd:EventCommand Command="{Binding BeginLiveCommand}"></cmd:EventCommand>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Button>
+        <Button x:Name="StopButton" Content="结束" Grid.Column="1" 
+                HorizontalAlignment="Left" Margin="625,27,0,0" Grid.Row="4" VerticalAlignment="Top" Width="82" Height="31"
+                Background="LightGray"
+                BorderBrush="LightGray"
+                Foreground="{DynamicResource PrimaryTextColor}"
+                >
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Visibility" Value="Hidden"></Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Recording}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"></Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Recording}" Value="False">
+                            <Setter Property="Visibility" Value="Hidden"></Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Click">
+                    <cmd:EventCommand Command="{Binding StopReocrdCommand}"></cmd:EventCommand>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <Button.Template>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid>
+                        <Border x:Name="StopButtonBorder" Grid.ColumnSpan="2" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="7,7,7,7" Background="{TemplateBinding Background}"></Border>
+                        <TextBlock Text="{Binding LiveClock}" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsFocused" Value="True"/>
+                        <Trigger Property="IsDefaulted" Value="True"/>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="StopButtonBorder" Property="Background" Value="#FF999999"></Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+        <Label Grid.Row="2" Content="素材" Foreground="{DynamicResource Secondary}"></Label>
+        <Grid Grid.Row="3" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Button ContentTemplate="{StaticResource MaterialButtonDataTemplate}"
+                    Content="{StaticResource CameraMaterialButton}"
+                    Background="{x:Null}"
+                    Foreground="{StaticResource PrimaryColor}"
+                    BorderBrush="{x:Null}"></Button>
+            <Button ContentTemplate="{StaticResource MaterialButtonDataTemplate}"
+                    Content="{StaticResource VideoMaterialButton}"
+                    Background="{x:Null}"
+                    Foreground="{StaticResource PrimaryColor}"
+                    BorderBrush="{x:Null}"
+                    Grid.Column="1"></Button>
+            <Button ContentTemplate="{StaticResource MaterialButtonDataTemplate}"
+                    Content="{StaticResource DesktopMaterialButton}"
+                    Background="{x:Null}"
+                    Foreground="{StaticResource PrimaryColor}"
+                    BorderBrush="{x:Null}"
+                    Grid.Column="2"></Button>
+        </Grid>
+    </Grid>
+</Window>

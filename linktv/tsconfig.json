@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+      // 其他配置
+      "paths": {
+        "/@/*": [
+          "./src/*"
+        ]
+      },
+      "lib": [
+        "esnext",
+        "dom",
+        "dom.iterable",
+        "scripthost"
+      ],
+      "allowJs": true,
+      "resolveJsonModule": true,
+      "noUnusedParameters": false,
+      "strictNullChecks": false,
+      "noImplicitUseStrict": false
+    },
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "src/**/*.vue",
+      "src/types/images.d.ts",
+      "tests/**/*.ts",
+      "tests/**/*.tsx"
+    ],
+    "exclude": [
+      "node_modules"
+    ],
+  }

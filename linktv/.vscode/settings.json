@@ -1,0 +1,14 @@
+{
+    "css.styleSheets": [
+        "https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css",
+        "/style.css",
+        "style.css",
+        "${fileBasenameNoExtension}.css"
+    ],
+
+    "css.enabledLanguages": [
+        "html",
+        "vue",
+    ],
+    "typescript.tsdk": "node_modules/typescript/lib",
+}

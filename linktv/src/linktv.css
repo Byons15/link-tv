@@ -1,0 +1,50 @@
+
+button.text-light:hover{
+    color: #2196f3!important;
+}
+
+.btn:hover{
+    color: #2196f3;
+}
+
+.btn{
+    padding: 0.5em;
+}
+
+.fill-light{
+   
+    fill: #e6e6e6;
+}
+
+.fill-dark{
+    fill:#333333;
+}
+
+.btn:focus{
+    outline-style: none;
+    box-shadow:none;
+}
+
+.btn:active{
+    outline-style: none;
+}
+
+.btn:hover > svg{
+    fill:#2196f3;
+    transition-property: fill;
+    transition: .5s;
+}
+
+.bg-dark{
+    background-color: #343a40aa!important;
+}
+
+.dropdown:hover > .dropdown-menu, .dropup:hover > .dropdown-menu, .dropright:hover > .dropdown-menu{
+    display: block;
+}
+
+.dropdown > .dropdown-toggle:active, .dropup > .dropdown-toggle:active, .dropright > .dropdown-toggle:active{
+    pointer-events: none;
+}
+ 
+
