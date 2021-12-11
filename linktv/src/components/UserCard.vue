@@ -11,12 +11,6 @@ const emites = defineEmits(["logout"]);
 
 const client = new UserClient();
 
-// userApi.apiUserGet().then((response) => {
-//   name.value = response.data.name;
-//   id.value = response.data.id;
-//   email.value = response.data.email;
-// });
-
 client.get(0).then((user: UserDTO) => {
   name.value = user.name;
   id.value = user.id;

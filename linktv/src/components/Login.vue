@@ -4,7 +4,7 @@ import Router from "../Router";
 import axios, { AxiosResponse } from "axios";
 import { nextTick, onBeforeUpdate, onMounted } from "@vue/runtime-core";
 import { IInternalErrorDescription, IInvalidModelDescription, Login, UserClient } from "../LinkClient";
-import { DelayAction } from "../DelayAction";
+import { DelayAction } from "../Utils";
 
 const emits = defineEmits(["logined"]);
 
@@ -16,9 +16,6 @@ const password = ref("");
 onMounted(() => {
   nextTick(() => {
     if (localStorage.getItem("token") != null) {
-      axios.defaults.headers.common["Authorization"] =
-        "Bearer " + localStorage.getItem("token");
-
       emits("logined");
     }
   });

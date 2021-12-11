@@ -7,6 +7,7 @@ import {
   UserClient,
   UserCore,
 } from "./LinkClient";
+import axios from "axios";
 
 const userName = ref("");
 const userNameInvalidMsg = ref("");
@@ -121,7 +122,12 @@ function submit() {
       emailAuthCode: emailAuthCode.value,
       password: password.value,
     })
-    .then((token: string) => {})
+    .then((token: string) => {
+      localStorage.setItem("token", token);
+      axios.defaults.headers.common["Authorization"] =
+        "Bearer " + localStorage.getItem("token");
+      Router.push("/home");
+    })
     .catch((invalidResponse: IInvalidModelDescription) => {
       const errors = invalidResponse.errors;
 

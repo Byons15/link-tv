@@ -16,7 +16,7 @@ export class CaptchaClient {
 
     constructor(baseUrl?: string, instance?: AxiosInstance) {
         this.instance = instance ? instance : axios.create();
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://106.52.238.70:5000";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62407";
     }
 
     /**
@@ -155,7 +155,7 @@ export class LiveClient {
 
     constructor(baseUrl?: string, instance?: AxiosInstance) {
         this.instance = instance ? instance : axios.create();
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://106.52.238.70:5000";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62407";
     }
 
     /**
@@ -640,7 +640,7 @@ export class UserClient {
 
     constructor(baseUrl?: string, instance?: AxiosInstance) {
         this.instance = instance ? instance : axios.create();
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://106.52.238.70:5000";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62407";
     }
 
     /**

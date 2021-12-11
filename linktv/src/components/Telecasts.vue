@@ -5,7 +5,7 @@ import { ref } from "vue";
 import { LiveClient, Studio } from "../LinkClient";
 
 const lives = ref<Studio[]>();
-const empty = ref<boolean>(true);
+const empty = ref(false);
 
 onMounted(() => {
   nextTick(() => {
@@ -19,7 +19,7 @@ onMounted(() => {
     const liveClient = new LiveClient();
     liveClient.all().then((studios: Studio[])=>{
       lives.value = studios;
-      empty.value = studios.length == 0 ? true : false;
+       empty.value = lives.value.length == 0 ? true : false;
     })
 
   });
