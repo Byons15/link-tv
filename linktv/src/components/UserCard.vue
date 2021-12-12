@@ -30,11 +30,7 @@ function showLogoutConfirm() {
   logoutConfirm.value = true;
 }
 
-const showImageUploadModal = ref(true);
-
-function onShowImageUploadMoadal(){
-  showImageUploadModal.value = true;
-}
+const showImageUploadModal = ref(false);
 
 </script>
 
@@ -79,7 +75,7 @@ function onShowImageUploadMoadal(){
                 small
                 text-center
               "
-              @click="onShowImageUploadMoadal"
+              @click="showImageUploadModal = true"
             >
               编辑
             </div>
@@ -131,7 +127,7 @@ function onShowImageUploadMoadal(){
       </div>
     </div>
 
-    <ImageUploadModal v-if="showImageUploadModal"></ImageUploadModal>
+    <ImageUploadModal v-if="showImageUploadModal" @closed="showImageUploadModal = false"></ImageUploadModal>
   </div>
 </template>
 
