@@ -16,7 +16,7 @@ export class CaptchaClient {
 
     constructor(baseUrl?: string, instance?: AxiosInstance) {
         this.instance = instance ? instance : axios.create();
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.site:5000";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62407";
     }
 
     /**
@@ -155,7 +155,7 @@ export class LiveClient {
 
     constructor(baseUrl?: string, instance?: AxiosInstance) {
         this.instance = instance ? instance : axios.create();
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.site:5000";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62407";
     }
 
     /**
@@ -640,7 +640,7 @@ export class UserClient {
 
     constructor(baseUrl?: string, instance?: AxiosInstance) {
         this.instance = instance ? instance : axios.create();
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.site:5000";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62407";
     }
 
     /**
@@ -1301,6 +1301,72 @@ export class UserClient {
         }
         return Promise.resolve<void>(<any>null);
     }
+
+    updateUserImage(id: number | undefined, suffix: string | null | undefined, imageFile: FileParameter | null | undefined , cancelToken?: CancelToken | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/User/userImage?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        if (suffix !== undefined && suffix !== null)
+            url_ += "suffix=" + encodeURIComponent("" + suffix) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (imageFile !== null && imageFile !== undefined)
+            content_.append("imageFile", imageFile.data, imageFile.fileName ? imageFile.fileName : "imageFile");
+
+        let options_ = <AxiosRequestConfig>{
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processUpdateUserImage(_response);
+        });
+    }
+
+    protected processUpdateUserImage(response: AxiosResponse): Promise<void> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(<any>null);
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = InvalidModelDescription.fromJS(resultData400);
+            return throwException("\u8bf7\u6c42\u7684\u53c2\u6570\u65e0\u6548\u65f6\u8fd4\u56de\u6b64\u6a21\u578b\u3002", status, _responseText, _headers, result400);
+        } else if (status === 500) {
+            const _responseText = response.data;
+            let result500: any = null;
+            let resultData500  = _responseText;
+            result500 = InternalErrorDescription.fromJS(resultData500);
+            return throwException("\u670d\u52a1\u5668\u5185\u90e8\u53d1\u751f\u9519\u8bef\u65f6\u8fd4\u56de\u6b64\u6a21\u578b\u3002", status, _responseText, _headers, result500);
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<void>(<any>null);
+    }
 }
 
 /** 用于客户端请求图形验证码的响应模型 */
@@ -1879,6 +1945,11 @@ export interface IInternalErrorDescription {
     title?: string | undefined;
     /** 追踪ID，客户端应及时将此ID反馈回开发人员 */
     traceId?: string | undefined;
+}
+
+export interface FileParameter {
+    data: any;
+    fileName: string;
 }
 
 export class ApiException extends Error {

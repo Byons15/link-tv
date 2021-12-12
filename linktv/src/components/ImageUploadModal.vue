@@ -3,6 +3,7 @@ import { ref } from "@vue/reactivity";
 import { nextTick, onMounted } from "@vue/runtime-core";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
+import { FileParameter, IInvalidModelDescription, UserClient } from "../LinkClient";
 
 const emits = defineEmits(["closed"]);
 
@@ -19,20 +20,45 @@ const srcImgElement = ref<HTMLImageElement>();
 
 let cropper: Cropper;
 
+const imgDemo = ref<HTMLCanvasElement>();
+let imgDemoCtx: CanvasRenderingContext2D;
+let imgDemoSrc: HTMLImageElement;
+
 function cropperEvent(e: Cropper.CropEvent<HTMLImageElement>) {
-  let base64Img = cropper
-    .getCroppedCanvas({
-      imageSmoothingQuality: "high",
-    })
-    .toDataURL("image/jpg");
-    // 显示base64Img内容
+  nextTick(() => {
+    imgDemoCtx.drawImage(
+      imgDemoSrc,
+      e.detail.x,
+      e.detail.y,
+      e.detail.width,
+      e.detail.height,
+      0,
+      0,
+      64,
+      64
+    );
+  });
 }
 
+const loadedAnyFile = ref(false);
+
 function onFileInputChanged() {
+  if (fileInputElement.value.files.length == 0) {
+    loadedAnyFile.value = false;
+    return;
+  }
+
+  loadedAnyFile.value = true;
   fileLabel.value = fileInputElement.value.files[0].name;
+
   var reader = new FileReader();
   reader.onload = (e) => {
     srcImgElement.value.src = e.target.result as string;
+    imgDemoSrc = new Image();
+    imgDemoSrc.style.display = "none";
+    imgDemoSrc.src = e.target.result as string;
+    imgDemo.value.appendChild(imgDemoSrc);
+
     nextTick(() => {
       cropper = new Cropper(srcImgElement.value, {
         viewMode: 1,
@@ -45,11 +71,34 @@ function onFileInputChanged() {
         zoomOnWheel: true,
         crop: cropperEvent,
       });
+      imgDemoCtx = imgDemo.value.getContext("2d");
     });
   };
 
   reader.readAsDataURL(fileInputElement.value.files[0]);
 }
+
+function onUpload(){
+
+  if(cropper === undefined)
+    return;
+
+  cropper.getCroppedCanvas({
+    imageSmoothingQuality: 'high'
+  }).toBlob((blob)=>{
+    console.log(blob);
+    var types = blob.type.split('/');
+    const api = new UserClient();
+    api.updateUserImage(0, "."+types[1], <FileParameter>{
+      data: blob,
+      fileName: fileInputElement.value.files[0].name
+    }).catch((error)=>{
+      console.log(error);
+    }).then(()=>{
+      console.log("上传成功");
+    })
+  });
+};
 
 onMounted(() => {
   nextTick(() => {});
@@ -86,9 +135,17 @@ onMounted(() => {
           <div class="image-container mt-2">
             <img ref="srcImgElement" class="image" />
           </div>
+          <canvas
+            class="rounded-circle mt-3"
+            width="64"
+            height="64"
+            ref="imgDemo"
+            v-if="loadedAnyFile"
+            style="width: 64px; height: 64px"
+          ></canvas>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary">上传</button>
+          <button type="button" class="btn btn-primary" @click="onUpload">上传</button>
           <button
             type="button"
             class="btn btn-secondary"

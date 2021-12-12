@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using LinkServer.Components;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace LinkServer.Services
 {
@@ -96,6 +97,11 @@ namespace LinkServer.Services
                 throw new InvalidModelException("密码不正确", nameof(model.Password));
 
             return tokenService.CreateToken(user.Id);
+        }
+
+        public async Task UpdateUserImage(long id, string suffix, System.IO.Stream imageStream)
+        {
+            //TODO:: 添加接收图像文件的功能。
         }
 
         /// <summary>
