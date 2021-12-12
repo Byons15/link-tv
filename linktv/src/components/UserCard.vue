@@ -2,6 +2,7 @@
 import { ref } from "@vue/reactivity";
 import axios from "axios";
 import { UserClient, UserDTO } from "../LinkClient";
+import ImageUploadModal from "./ImageUploadModal.vue";
 
 const name = ref("");
 const id = ref(null);
@@ -28,28 +29,62 @@ const logoutConfirm = ref(false);
 function showLogoutConfirm() {
   logoutConfirm.value = true;
 }
+
+const showImageUploadModal = ref(true);
+
+function onShowImageUploadMoadal(){
+  showImageUploadModal.value = true;
+}
+
 </script>
 
 <template>
   <div>
     <div class="px-4 py-3">
       <div class="d-flex flex-column justify-content-center">
-        <svg
-          t="1636988377253"
-          class="icon align-self-center"
-          viewBox="0 0 1024 1024"
-          version="1.1"
-          xmlns="http://www.w3.org/2000/svg"
-          p-id="2875"
-          width="4em"
-          height="4em"
+        <div
+          class="
+            d-flex
+            align-self-center
+            rounded-circle
+            overflow-hidden
+            bg-dark
+          "
+          style="height: 4em; width: 4em"
         >
-          <path
-            d="M761.8 600.9c-64 57.6-147.2 96-243.2 96s-179.2-38.4-249.6-96C108.8 684.2 0 793 0 991.4H1024.2c0-198.4-108.8-300.8-262.4-390.5z m-249.7 19.2c160 0 288.1-134.4 288.1-294.5 0-160-128-294.5-288.1-294.5s-288 134.6-288 294.6c0 166.4 134.4 294.4 288 294.4z m0 0"
-            fill="#8a8a8a"
-            p-id="2876"
-          ></path>
-        </svg>
+          <img
+            src="../assets/user.png"
+            alt=""
+            class="align-self-center img-fluid"
+            style="width: 4em; height: 4em"
+          />
+          <div
+            class="position-absolute"
+            style="
+              height: 4em;
+              width: 4em;
+              z-index: 2;
+              background-color: transparent;
+            "
+          >
+            <div
+              class="
+                w-100
+                h-100
+                rounded-circle
+                d-flex
+                flex-column
+                justify-content-end
+                image-box
+                small
+                text-center
+              "
+              @click="onShowImageUploadMoadal"
+            >
+              编辑
+            </div>
+          </div>
+        </div>
         <span class="align-self-center">{{ name }}</span>
         <table class="table table-borderless table-sm mt-3">
           <tbody>
@@ -95,6 +130,8 @@ function showLogoutConfirm() {
         </div>
       </div>
     </div>
+
+    <ImageUploadModal v-if="showImageUploadModal"></ImageUploadModal>
   </div>
 </template>
 
@@ -104,5 +141,17 @@ function showLogoutConfirm() {
   background-color: #20202077;
   left: 0%;
   top: 0%;
+}
+
+.image-box{
+  color:transparent;
+  cursor: pointer;
+}
+
+.image-box:hover {
+  background-color: #20202077;
+  color: aliceblue;
+  box-shadow: 0px 0px 5px #0f0f0fc0;
+  transition: 0.3s;
 }
 </style>
