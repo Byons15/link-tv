@@ -7,7 +7,7 @@ import { FileParameter, IInternalErrorDescription, IInvalidModelDescription, Use
 
 const emits = defineEmits(["closed", "uploaded"]);
 
-const fileLabel = ref("支持jpg png jpeg格式。");
+const fileLabel = ref("导入图片以进行编辑。");
 
 const fileInputElement = ref<HTMLInputElement>();
 
