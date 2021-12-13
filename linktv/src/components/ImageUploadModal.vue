@@ -3,9 +3,9 @@ import { ref } from "@vue/reactivity";
 import { nextTick, onMounted } from "@vue/runtime-core";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
-import { FileParameter, IInvalidModelDescription, UserClient } from "../LinkClient";
+import { FileParameter, IInternalErrorDescription, IInvalidModelDescription, UserClient } from "../LinkClient";
 
-const emits = defineEmits(["closed"]);
+const emits = defineEmits(["closed", "uploaded"]);
 
 const fileLabel = ref("支持jpg png jpeg格式。");
 
@@ -59,6 +59,11 @@ function onFileInputChanged() {
     imgDemoSrc.src = e.target.result as string;
     imgDemo.value.appendChild(imgDemoSrc);
 
+    if(cropper != null){
+      cropper.destroy();
+      cropper = null;
+    }
+
     nextTick(() => {
       cropper = new Cropper(srcImgElement.value, {
         viewMode: 1,
@@ -86,16 +91,15 @@ function onUpload(){
   cropper.getCroppedCanvas({
     imageSmoothingQuality: 'high'
   }).toBlob((blob)=>{
-    console.log(blob);
     var types = blob.type.split('/');
     const api = new UserClient();
-    api.updateUserImage(0, "."+types[1], <FileParameter>{
+    api.updateUserImage(0, types[1], <FileParameter>{
       data: blob,
       fileName: fileInputElement.value.files[0].name
-    }).catch((error)=>{
+    }).catch((error:IInternalErrorDescription)=>{
       console.log(error);
     }).then(()=>{
-      console.log("上传成功");
+      emits("uploaded");
     })
   });
 };

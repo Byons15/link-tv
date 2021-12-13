@@ -76,9 +76,9 @@ namespace LinkServer.Controllers
         /// <returns>用户信息</returns>
         [HttpGet]
         [UserAction]
-        public UserDTO Get(long id)
+        public async Task<UserDTO> Get(long id)
         {
-            return userService.User(id);
+            return await userService.UserAsync(id);
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace LinkServer.Controllers
             [StringLength(8, MinimumLength = 2, ErrorMessage = "文件名后缀不合法")]string suffix, 
             [Required(ErrorMessage = "必须提供文件")]IFormFile imageFile)
         {
-            
+            await userService.UpdateUserImageAsync(id, suffix, imageFile.OpenReadStream());
         }
     }
 }

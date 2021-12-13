@@ -9,6 +9,8 @@ using System.ComponentModel.DataAnnotations;
 using LinkServer.Components;
 using System.Text.RegularExpressions;
 using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LinkServer.Services
 {
@@ -24,17 +26,24 @@ namespace LinkServer.Services
 
         private readonly CaptchaService captchaService;
 
+        private readonly string userImageRepository;
+
         /// <summary>
         /// 务必使用依赖注入构造
         /// </summary>
         /// <param name="userContext"></param>
         /// <param name="tokenService"></param>
         /// <param name="captchaService"></param>
-        public UserService(UserContext userContext, TokenService tokenService, CaptchaService captchaService)
+        /// <param name="configuration"></param>
+        public UserService(UserContext userContext, TokenService tokenService, CaptchaService captchaService, IConfiguration configuration)
         {
             this.userContext = userContext;
             this.tokenService = tokenService;
             this.captchaService = captchaService;
+
+            userImageRepository = configuration["UserResourcesPath"] + "/UserImages/";
+            if(!Directory.Exists(userImageRepository))
+                Directory.CreateDirectory(userImageRepository);
         }
 
         /// <summary>
@@ -99,9 +108,13 @@ namespace LinkServer.Services
             return tokenService.CreateToken(user.Id);
         }
 
-        public async Task UpdateUserImage(long id, string suffix, System.IO.Stream imageStream)
+        public async Task UpdateUserImageAsync(long id, string suffix, System.IO.Stream imageStream)
         {
-            //TODO:: 添加接收图像文件的功能。
+            using var file = File.Create($"{userImageRepository}{id}.{suffix}");
+            await imageStream.CopyToAsync(file);
+
+            userContext.Users.Find(id).Image = $"{userImageRepository}{id}.{suffix}";
+            await userContext.SaveChangesAsync();
         }
 
         /// <summary>
@@ -109,9 +122,18 @@ namespace LinkServer.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public UserDTO User(long id)
+        public async Task<UserDTO> UserAsync(long id)
         {
-            return new UserDTO(userContext.Find<User>(id));
+            var user = await userContext.FindAsync<User>(id);
+            var userDTO = new UserDTO(user);
+            
+            if(user.Image != null && user.Image.Length > 0)
+            {
+                var imageFile = await File.ReadAllBytesAsync(user.Image);
+                userDTO.Image = new FileContentResult(imageFile, $"image/{user.Image[(user.Image.LastIndexOf('.')+1)..]}");
+            }
+
+            return userDTO;
         }
 
         /// <summary>

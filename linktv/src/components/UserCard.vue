@@ -7,21 +7,28 @@ import ImageUploadModal from "./ImageUploadModal.vue";
 const name = ref("");
 const id = ref(null);
 const email = ref();
+const image = ref("./src/assets/user.png");
 
-const emites = defineEmits(["logout"]);
+const emites = defineEmits(["logoutEvent"]);
 
 const client = new UserClient();
 
 client.get(0).then((user: UserDTO) => {
-  name.value = user.name;
-  id.value = user.id;
-  email.value = user.email;
-});
+    name.value = user.name;
+    id.value = user.id;
+    email.value = user.email;
+    if(user.image !== undefined ){
+      var file = user.image as any;
+      image.value = "data:" + file.contentType + ";base64,"+file.fileContents;
+    }
+
+    showImageUploadModal.value = false;
+  });
 
 function onLogout() {
   localStorage.removeItem("token");
   axios.defaults.headers.common["Authorization"] = "";
-  emites("logout");
+  emites("logoutEvent");
 }
 
 const logoutConfirm = ref(false);
@@ -32,6 +39,19 @@ function showLogoutConfirm() {
 
 const showImageUploadModal = ref(false);
 
+function onUserInfoChanged() {
+  client.get(0).then((user: UserDTO) => {
+    name.value = user.name;
+    id.value = user.id;
+    email.value = user.email;
+    if(user.image !== undefined ){
+      var file = user.image as any;
+      image.value = "data:" + file.contentType + ";base64,"+file.fileContents;
+    }
+
+    showImageUploadModal.value = false;
+  });
+}
 </script>
 
 <template>
@@ -49,10 +69,10 @@ const showImageUploadModal = ref(false);
           style="height: 4em; width: 4em"
         >
           <img
-            src="../assets/user.png"
             alt=""
             class="align-self-center img-fluid"
             style="width: 4em; height: 4em"
+            :src="image"
           />
           <div
             class="position-absolute"
@@ -127,7 +147,11 @@ const showImageUploadModal = ref(false);
       </div>
     </div>
 
-    <ImageUploadModal v-if="showImageUploadModal" @closed="showImageUploadModal = false"></ImageUploadModal>
+    <ImageUploadModal
+      v-if="showImageUploadModal"
+      @closed="showImageUploadModal = false"
+      @uploaded="onUserInfoChanged"
+    ></ImageUploadModal>
   </div>
 </template>
 
@@ -139,8 +163,8 @@ const showImageUploadModal = ref(false);
   top: 0%;
 }
 
-.image-box{
-  color:transparent;
+.image-box {
+  color: transparent;
   cursor: pointer;
 }
 

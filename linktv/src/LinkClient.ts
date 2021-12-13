@@ -16,7 +16,7 @@ export class CaptchaClient {
 
     constructor(baseUrl?: string, instance?: AxiosInstance) {
         this.instance = instance ? instance : axios.create();
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62407";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62408";
     }
 
     /**
@@ -155,7 +155,7 @@ export class LiveClient {
 
     constructor(baseUrl?: string, instance?: AxiosInstance) {
         this.instance = instance ? instance : axios.create();
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62407";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62408";
     }
 
     /**
@@ -640,7 +640,7 @@ export class UserClient {
 
     constructor(baseUrl?: string, instance?: AxiosInstance) {
         this.instance = instance ? instance : axios.create();
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62407";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "http://byons.tpddns.cn:62408";
     }
 
     /**
@@ -1679,8 +1679,7 @@ export class UserDTO implements IUserDTO {
     email?: string | undefined;
     /** 用户名 */
     name?: string | undefined;
-    /** 用户头像，用于传输时为base64编码 */
-    image?: string | undefined;
+    image?: string;
     /** 用户最后一次直播的时间 */
     lastLive?: Date | undefined;
     /** 直播间名称 */
@@ -1737,8 +1736,7 @@ export interface IUserDTO {
     email?: string | undefined;
     /** 用户名 */
     name?: string | undefined;
-    /** 用户头像，用于传输时为base64编码 */
-    image?: string | undefined;
+    image?: string;
     /** 用户最后一次直播的时间 */
     lastLive?: Date | undefined;
     /** 直播间名称 */

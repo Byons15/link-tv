@@ -140,9 +140,12 @@ function onLogout() {
         </button>
         <div class="dropdown-menu dropdown-menu-right">
           <Login @logined="onLogined" @logout="onLogout" v-if="!logined"></Login>
-          <UserCard v-else @logout="onLogout"></UserCard>
+          <UserCard v-else @logout-event="onLogout"></UserCard>
         </div>
       </div>
+    </div>
+    <div>
+      
     </div>
   </nav>
 </template>

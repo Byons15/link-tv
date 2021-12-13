@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LinkServer.Models
 {
@@ -29,7 +31,7 @@ namespace LinkServer.Models
         /// <summary>
         /// 用户头像，用于传输时为base64编码
         /// </summary>
-        public string Image { get; set; }
+        public FileContentResult Image { get; set; }
 
         /// <summary>
         /// 用户最后一次直播的时间
@@ -63,7 +65,6 @@ namespace LinkServer.Models
             Id = user.Id;
             Email = user.Email;
             Name = user.Name;
-            Image = user.Image;
             LastLive = user.LastLive;
             TVImage = user.TVImage;
             TVName = user.TVName;
