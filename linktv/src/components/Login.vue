@@ -3,7 +3,12 @@ import { ref } from "@vue/reactivity";
 import Router from "../Router";
 import axios, { AxiosResponse } from "axios";
 import { nextTick, onBeforeUpdate, onMounted } from "@vue/runtime-core";
-import { IInternalErrorDescription, IInvalidModelDescription, Login, UserClient } from "../LinkClient";
+import {
+  IInternalErrorDescription,
+  IInvalidModelDescription,
+  Login,
+  UserClient,
+} from "../LinkClient";
 
 const emits = defineEmits(["loginedEvent"]);
 
@@ -37,28 +42,25 @@ function onLogin() {
   userClient
     .login(<Login>{
       name: userName.value,
-      password: password.value
+      password: password.value,
     })
-    .then((response:string) => {
-      axios.defaults.headers.common["Authorization"] = "Bearer "+ response;
+    .then((response: string) => {
+      axios.defaults.headers.common["Authorization"] = "Bearer " + response;
       localStorage.setItem("token", response);
       emits("loginedEvent");
     })
     .catch((response: IInvalidModelDescription) => {
-        
-        if(response.errors['Name'] !== undefined){
-          invalidName.value = true;
-          invalidNameDesc.value = response.errors['Name'][0];
-        }
+      if (response.errors["Name"] !== undefined) {
+        invalidName.value = true;
+        invalidNameDesc.value = response.errors["Name"][0];
+      }
 
-        if(response.errors['Password'] !== undefined)
-        {
-          invalidPassword.value = true;
-          invalidPasswordDesc.value = response.errors["Password"][0];
-        }
-    }).catch((internalError: IInternalErrorDescription)=>{
-      
+      if (response.errors["Password"] !== undefined) {
+        invalidPassword.value = true;
+        invalidPasswordDesc.value = response.errors["Password"][0];
+      }
     })
+    .catch((internalError: IInternalErrorDescription) => {})
     .finally(() => {
       logging.value = false;
     });

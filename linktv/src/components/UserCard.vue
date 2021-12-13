@@ -3,6 +3,7 @@ import { ref } from "@vue/reactivity";
 import axios from "axios";
 import { UserClient, UserDTO } from "../LinkClient";
 import ImageUploadModal from "./ImageUploadModal.vue";
+import JQuery from "jquery";
 
 const name = ref("");
 const id = ref(null);
@@ -27,15 +28,17 @@ client.get(0).then((user: UserDTO) => {
   showImageUploadModal.value = false;
 });
 
-function onLogout() {
-  localStorage.removeItem("token");
-  axios.defaults.headers.common["Authorization"] = "";
-  emits("logoutEvent");
-}
-
 const logoutConfirm = ref(false);
 
-function onUserInfoChanged() {
+const imageUploadModalElement = ref(null);
+
+function onImageUploadCancel() {
+  JQuery("#imageUploadModal").modal("hide");
+}
+
+function onUserImageUploaded() {
+  onImageUploadCancel();
+
   client.get(0).then((user: UserDTO) => {
     name.value = user.name;
     id.value = user.id;
@@ -48,6 +51,19 @@ function onUserInfoChanged() {
     showImageUploadModal.value = false;
   });
 }
+
+function toggleLogoutConfirmModal(state:string){
+  JQuery("#logoutConfirmModal").modal(state);
+}
+
+function onLogout() {
+  toggleLogoutConfirmModal('hide');
+
+  localStorage.removeItem("token");
+  axios.defaults.headers.common["Authorization"] = "";
+  emits("logoutEvent");
+}
+
 </script>
 
 <template>
@@ -91,9 +107,28 @@ function onUserInfoChanged() {
                 small
                 text-center
               "
-              @click="showImageUploadModal = true"
             >
-              编辑
+              <button
+                type="button"
+                class="btn text-light btn-sm"
+                data-toggle="modal"
+                data-target="#imageUploadModal"
+              >
+                编辑
+              </button>
+              <Teleport to="body">
+                <div
+                  class="modal fade"
+                  tabindex="-1"
+                  aria-hidden="true"
+                  id="imageUploadModal"
+                >
+                  <ImageUploadModal
+                    @cancel-event="onImageUploadCancel"
+                    @uploaded-event="onUserImageUploaded"
+                  ></ImageUploadModal>
+                </div>
+              </Teleport>
             </div>
           </div>
         </div>
@@ -113,17 +148,29 @@ function onUserInfoChanged() {
       </div>
     </div>
     <div class="dropdown-divider"></div>
-    <button class="btn dropdown-item text-center" @click="logoutConfirm = true">
+    <button
+      class="btn dropdown-item text-center"
+      data-toggle="modal"
+      data-target="#logoutConfirmModal"
+    >
       登出
     </button>
 
-    <!-- Modal -->
-    <Teleport to='body'>
-      <div class="position-fixed w-100 h-100 bg-translucent" v-if="logoutConfirm">
+    <Teleport to="body">
+      <div
+        class="modal fade"
+        tabindex="-1"
+        aria-hidden="true"
+        id="logoutConfirmModal"
+      >
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" @click="logoutConfirm = false">
+              <button
+                type="button"
+                class="close"
+                @click="toggleLogoutConfirmModal('hide')"
+              >
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -132,7 +179,7 @@ function onUserInfoChanged() {
               <button
                 type="button"
                 class="btn btn-secondary"
-                @click="logoutConfirm = false"
+                @click="toggleLogoutConfirmModal('hide')"
               >
                 取消
               </button>
@@ -144,24 +191,10 @@ function onUserInfoChanged() {
         </div>
       </div>
     </Teleport>
-
-    <Teleport to="body">
-      <ImageUploadModal
-        v-if="showImageUploadModal"
-        @closed="showImageUploadModal = false"
-        @uploaded="onUserInfoChanged"
-      ></ImageUploadModal>
-    </Teleport>
   </div>
 </template>
 
 <style scoped>
-.bg-translucent {
-  z-index: 3;
-  background-color: #20202077;
-  left: 0%;
-  top: 0%;
-}
 
 .image-box {
   color: transparent;

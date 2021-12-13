@@ -3,9 +3,14 @@ import { ref } from "@vue/reactivity";
 import { nextTick, onMounted } from "@vue/runtime-core";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
-import { FileParameter, IInternalErrorDescription, IInvalidModelDescription, UserClient } from "../LinkClient";
+import {
+  FileParameter,
+  IInternalErrorDescription,
+  IInvalidModelDescription,
+  UserClient,
+} from "../LinkClient";
 
-const emits = defineEmits(["closed", "uploaded"]);
+const emits = defineEmits(["cancelEvent", "uploadedEvent"]);
 
 const fileLabel = ref("导入图片以进行编辑。");
 
@@ -59,7 +64,7 @@ function onFileInputChanged() {
     imgDemoSrc.src = e.target.result as string;
     imgDemo.value.appendChild(imgDemoSrc);
 
-    if(cropper != null){
+    if (cropper != null) {
       cropper.destroy();
       cropper = null;
     }
@@ -83,26 +88,29 @@ function onFileInputChanged() {
   reader.readAsDataURL(fileInputElement.value.files[0]);
 }
 
-function onUpload(){
+function onUpload() {
+  if (cropper === undefined) return;
 
-  if(cropper === undefined)
-    return;
-
-  cropper.getCroppedCanvas({
-    imageSmoothingQuality: 'high'
-  }).toBlob((blob)=>{
-    var types = blob.type.split('/');
-    const api = new UserClient();
-    api.updateUserImage(0, types[1], <FileParameter>{
-      data: blob,
-      fileName: fileInputElement.value.files[0].name
-    }).catch((error:IInternalErrorDescription)=>{
-      console.log(error);
-    }).then(()=>{
-      emits("uploaded");
+  cropper
+    .getCroppedCanvas({
+      imageSmoothingQuality: "high",
     })
-  });
-};
+    .toBlob((blob) => {
+      var types = blob.type.split("/");
+      const api = new UserClient();
+      api
+        .updateUserImage(0, types[1], <FileParameter>{
+          data: blob,
+          fileName: fileInputElement.value.files[0].name,
+        })
+        .catch((error: IInternalErrorDescription) => {
+          console.log(error);
+        })
+        .then(() => {
+          emits("uploadedEvent");
+        });
+    });
+}
 
 onMounted(() => {
   nextTick(() => {});
@@ -110,66 +118,60 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="position-fixed w-100 h-100 bg-translucent">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div class="modal-title">上传你的头像</div>
-          <button type="button" class="close" @click="$emit('closed')">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body d-flex flex-column justify-content-center">
-          <div class="custom-file">
-            <input
-              type="file"
-              class="custom-file-input"
-              id="customFileLangHTML"
-              accept="image/*"
-              ref="fileInputElement"
-              @change="onFileInputChanged"
-            />
-            <label
-              class="custom-file-label"
-              for="customFileLangHTML"
-              data-browse="选择"
-              >{{ fileLabel }}</label
-            >
-          </div>
-          <div class="image-container mt-2">
-            <img ref="srcImgElement" class="image" />
-          </div>
-          <canvas
-            class="rounded-circle mt-3"
-            width="64"
-            height="64"
-            ref="imgDemo"
-            v-if="loadedAnyFile"
-            style="width: 64px; height: 64px"
-          ></canvas>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" @click="onUpload">上传</button>
-          <button
-            type="button"
-            class="btn btn-secondary"
-            @click="$emit('closed')"
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">上传你的头像</div>
+        <button type="button" class="close" @click="$emit('cancelEvent')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body d-flex flex-column justify-content-center">
+        <div class="custom-file">
+          <input
+            type="file"
+            class="custom-file-input"
+            id="customFileLangHTML"
+            accept="image/*"
+            ref="fileInputElement"
+            @change="onFileInputChanged"
+          />
+          <label
+            class="custom-file-label"
+            for="customFileLangHTML"
+            data-browse="选择"
+            >{{ fileLabel }}</label
           >
-            取消
-          </button>
         </div>
+        <div class="image-container mt-2">
+          <img ref="srcImgElement" class="image" />
+        </div>
+        <canvas
+          class="rounded-circle mt-3"
+          width="64"
+          height="64"
+          ref="imgDemo"
+          v-if="loadedAnyFile"
+          style="width: 64px; height: 64px"
+        ></canvas>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" @click="onUpload">
+          上传
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          @click="$emit('cancelEvent')"
+        >
+          取消
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.bg-translucent {
-  z-index: 3;
-  background-color: #20202077;
-  left: 0%;
-  top: 0%;
-}
 
 .image-container {
   overflow: hidden;
