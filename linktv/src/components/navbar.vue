@@ -6,22 +6,22 @@ import UserCard from "./UserCard.vue";
 import LiveGuide from "./LiveGuide.vue";
 import { nextTick, onMounted } from "@vue/runtime-core";
 
-const emites = defineEmits(["logined"]);
+const emites = defineEmits(["loginedEvent"]);
 
 const logined = ref(false);
 
-onMounted(()=>{
-  nextTick(()=>{
+onMounted(() => {
+  nextTick(() => {
     let token = localStorage.getItem("token");
-    if(token != null){
+    if (token != null) {
       logined.value = true;
-      emites("logined");
+      emites("loginedEvent");
     }
   });
 });
 
 function onLogined() {
-  emites("logined");
+  emites("loginedEvent");
   logined.value = true;
 }
 
@@ -139,13 +139,18 @@ function onLogout() {
           </svg>
         </button>
         <div class="dropdown-menu dropdown-menu-right">
-          <Login @logined="onLogined" @logout="onLogout" v-if="!logined"></Login>
-          <UserCard v-else @logout-event="onLogout"></UserCard>
+          <Login
+            @logined-event="onLogined"
+            v-if="!logined"
+          ></Login>
+          <UserCard
+            v-else
+            @logout-event="onLogout"
+          ></UserCard>
         </div>
       </div>
     </div>
     <div>
-      
     </div>
   </nav>
 </template>

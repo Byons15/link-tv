@@ -5,7 +5,7 @@ import axios, { AxiosResponse } from "axios";
 import { nextTick, onBeforeUpdate, onMounted } from "@vue/runtime-core";
 import { IInternalErrorDescription, IInvalidModelDescription, Login, UserClient } from "../LinkClient";
 
-const emits = defineEmits(["logined"]);
+const emits = defineEmits(["loginedEvent"]);
 
 const userClient = new UserClient();
 
@@ -15,7 +15,7 @@ const password = ref("");
 onMounted(() => {
   nextTick(() => {
     if (localStorage.getItem("token") != null) {
-      emits("logined");
+      emits("loginedEvent");
     }
   });
 });
@@ -42,7 +42,7 @@ function onLogin() {
     .then((response:string) => {
       axios.defaults.headers.common["Authorization"] = "Bearer "+ response;
       localStorage.setItem("token", response);
-      emits("logined");
+      emits("loginedEvent");
     })
     .catch((response: IInvalidModelDescription) => {
         

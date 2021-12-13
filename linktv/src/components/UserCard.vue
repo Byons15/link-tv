@@ -9,44 +9,40 @@ const id = ref(null);
 const email = ref();
 const image = ref("./src/assets/user.png");
 
-const emites = defineEmits(["logoutEvent"]);
+const emits = defineEmits(["logoutEvent"]);
 
 const client = new UserClient();
 
-client.get(0).then((user: UserDTO) => {
-    name.value = user.name;
-    id.value = user.id;
-    email.value = user.email;
-    if(user.image !== undefined ){
-      var file = user.image as any;
-      image.value = "data:" + file.contentType + ";base64,"+file.fileContents;
-    }
+const showImageUploadModal = ref(false);
 
-    showImageUploadModal.value = false;
-  });
+client.get(0).then((user: UserDTO) => {
+  name.value = user.name;
+  id.value = user.id;
+  email.value = user.email;
+  if (user.image !== undefined) {
+    var file = user.image as any;
+    image.value = "data:" + file.contentType + ";base64," + file.fileContents;
+  }
+
+  showImageUploadModal.value = false;
+});
 
 function onLogout() {
   localStorage.removeItem("token");
   axios.defaults.headers.common["Authorization"] = "";
-  emites("logoutEvent");
+  emits("logoutEvent");
 }
 
 const logoutConfirm = ref(false);
-
-function showLogoutConfirm() {
-  logoutConfirm.value = true;
-}
-
-const showImageUploadModal = ref(false);
 
 function onUserInfoChanged() {
   client.get(0).then((user: UserDTO) => {
     name.value = user.name;
     id.value = user.id;
     email.value = user.email;
-    if(user.image !== undefined ){
+    if (user.image !== undefined) {
       var file = user.image as any;
-      image.value = "data:" + file.contentType + ";base64,"+file.fileContents;
+      image.value = "data:" + file.contentType + ";base64," + file.fileContents;
     }
 
     showImageUploadModal.value = false;
@@ -117,41 +113,45 @@ function onUserInfoChanged() {
       </div>
     </div>
     <div class="dropdown-divider"></div>
-    <button class="btn dropdown-item text-center" @click="showLogoutConfirm">
+    <button class="btn dropdown-item text-center" @click="logoutConfirm = true">
       登出
     </button>
 
     <!-- Modal -->
-    <div class="position-fixed w-100 h-100 bg-translucent" v-if="logoutConfirm">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" @click="logoutConfirm = false">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">退出登录将无法享受某些功能，确定退出？</div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              @click="logoutConfirm = false"
-            >
-              取消
-            </button>
-            <button type="button" class="btn btn-primary" @click="onLogout">
-              确定
-            </button>
+    <Teleport to='body'>
+      <div class="position-fixed w-100 h-100 bg-translucent" v-if="logoutConfirm">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" @click="logoutConfirm = false">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">退出登录将无法享受某些功能，确定退出？</div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                @click="logoutConfirm = false"
+              >
+                取消
+              </button>
+              <button type="button" class="btn btn-primary" @click="onLogout">
+                确定
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
 
-    <ImageUploadModal
-      v-if="showImageUploadModal"
-      @closed="showImageUploadModal = false"
-      @uploaded="onUserInfoChanged"
-    ></ImageUploadModal>
+    <Teleport to="body">
+      <ImageUploadModal
+        v-if="showImageUploadModal"
+        @closed="showImageUploadModal = false"
+        @uploaded="onUserInfoChanged"
+      ></ImageUploadModal>
+    </Teleport>
   </div>
 </template>
 
