@@ -21,6 +21,7 @@ using NSwag.CodeGeneration.TypeScript;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Newtonsoft.Json.Serialization;
+using LinkServer.Hubs;
 
 namespace LinkServer
 {
@@ -40,10 +41,7 @@ namespace LinkServer
             {
                 options.AddPolicy("Any", builder =>
                 {
-                    builder.AllowAnyOrigin()
-                    .AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    builder.SetIsOriginAllowed(_ => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                 });
             });
             var tokenOptions = Configuration.GetSection("TokenServiceOptions");
@@ -69,6 +67,8 @@ namespace LinkServer
                         ClockSkew = TimeSpan.Zero
                     };
                 });
+
+            services.AddSignalR();
 
             services.AddControllers(options =>
             {
@@ -197,6 +197,7 @@ namespace LinkServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }

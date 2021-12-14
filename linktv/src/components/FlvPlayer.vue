@@ -71,7 +71,7 @@ onBeforeUnmount(() => {});
 </script>
 
 <template>
-  <div class="w-100 h-100 m-auto">
+  <div class="w-100 h-100 m-auto" style="background-color: black;">
     <video class="w-100 m-0" style="min-height:100%; z-index: 1;" ref="videoElement"></video>
     <div
       class="position-absolute w-100 h-100 bg-dark"

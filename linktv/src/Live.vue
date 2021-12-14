@@ -7,6 +7,7 @@ import { getCurrentInstance, nextTick, onMounted } from "@vue/runtime-core";
 import Router from "./Router";
 import { LiveClient, IStudio, IInvalidModelDescription, Studio } from "./LinkClient";
 import ErrorModal from "./components/ErrorModal.vue";
+import ChatHub from "./components/ChatHub.vue";
 
 const errorMsg = ref("");
 
@@ -68,6 +69,7 @@ onMounted(() => {
           :class="{ 'col-md-9': !playerWidescreen }"
           ref="playerRef"
         ></Player>
+        <ChatHub :class="{ 'col-md-3': !playerWidescreen }" v-if="!playerWidescreen"></ChatHub>
       </div>
     </div>
     <Teleport to='body' v-if="errorMsg !== ''">
