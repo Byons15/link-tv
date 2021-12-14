@@ -9,7 +9,9 @@ import {
   Login,
   UserClient,
 } from "../LinkClient";
+import ErrorModal from "./ErrorModal.vue";
 
+const unknownError = ref(false);
 const emits = defineEmits(["loginedEvent"]);
 
 const userClient = new UserClient();
@@ -60,7 +62,9 @@ function onLogin() {
         invalidPasswordDesc.value = response.errors["Password"][0];
       }
     })
-    .catch((internalError: IInternalErrorDescription) => {})
+    .catch(() => {
+      unknownError.value = true;
+    })
     .finally(() => {
       logging.value = false;
     });
@@ -122,5 +126,8 @@ function onLogin() {
         <span class="sr-only">Loading...</span>
       </div>
     </button>
+    <Teleport to='body' v-if="unknownError">
+      <ErrorModal></ErrorModal>
+    </Teleport>
   </form>
 </template>

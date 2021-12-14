@@ -4,6 +4,9 @@ import axios from "axios";
 import { UserClient, UserDTO } from "../LinkClient";
 import ImageUploadModal from "./ImageUploadModal.vue";
 import JQuery from "jquery";
+import ErrorModal from "./ErrorModal.vue";
+
+const unknownError = ref(false);
 
 const name = ref("");
 const id = ref(null);
@@ -39,7 +42,11 @@ function onImageUploadCancel() {
 function onUserImageUploaded() {
   onImageUploadCancel();
 
-  client.get(0).then((user: UserDTO) => {
+  client.get(0)
+  .catch(()=>{
+    unknownError.value = true;
+  })
+  .then((user: UserDTO) => {
     name.value = user.name;
     id.value = user.id;
     email.value = user.email;
@@ -190,6 +197,9 @@ function onLogout() {
           </div>
         </div>
       </div>
+    </Teleport>
+    <Teleport to='body' v-if="unknownError">
+      <ErrorModal></ErrorModal>
     </Teleport>
   </div>
 </template>

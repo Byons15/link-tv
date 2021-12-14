@@ -5,7 +5,10 @@ import Telecasts from "./components/Telecasts.vue";
 import Navbar from "./components/navbar.vue";
 import { getCurrentInstance, nextTick, onMounted } from "@vue/runtime-core";
 import Router from "./Router";
-import { LiveClient, IStudio } from "./LinkClient";
+import { LiveClient, IStudio, IInvalidModelDescription, Studio } from "./LinkClient";
+import ErrorModal from "./components/ErrorModal.vue";
+
+const errorMsg = ref("");
 
 const playerWidescreen = ref(false);
 
@@ -35,7 +38,13 @@ onMounted(() => {
     //   });
     const api = new LiveClient();
     api.get(Router.currentRoute.value.params.id as string)
-    .then((studio: IStudio)=>{
+    .catch((error : IInvalidModelDescription)=>{
+      errorMsg.value = error.errors.name !== undefined ? error.errors.name[0] : '未知错误';
+    })
+    .catch(()=>{
+      errorMsg.value = '不知道什么问题';
+    })
+    .then((studio: Studio)=>{
       directorId = studio.id;
       director.value = studio.director;
       tvName.value = studio.name;
@@ -61,5 +70,8 @@ onMounted(() => {
         ></Player>
       </div>
     </div>
+    <Teleport to='body' v-if="errorMsg !== ''">
+      <ErrorModal :msg = "errorMsg"></ErrorModal>
+    </Teleport>
   </div>
 </template>
