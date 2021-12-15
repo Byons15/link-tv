@@ -22,6 +22,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using Newtonsoft.Json.Serialization;
 using LinkServer.Hubs;
+using System.Threading.Tasks;
 
 namespace LinkServer
 {
@@ -65,6 +66,24 @@ namespace LinkServer
                         RequireExpirationTime = true,
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.Zero
+                    };
+
+                    token.Events = new JwtBearerEvents
+                    { 
+                        OnMessageReceived = (context) => {
+                            if (!context.HttpContext.Request.Path.HasValue)
+                            {
+                                return Task.CompletedTask;
+                            }
+                            var accessToken = context.HttpContext.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if (!(string.IsNullOrWhiteSpace(accessToken)) && path.StartsWithSegments("/chat"))
+                            {
+                                context.Token = accessToken;
+                                return Task.CompletedTask;
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 

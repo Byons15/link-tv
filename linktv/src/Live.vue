@@ -7,7 +7,7 @@ import { getCurrentInstance, nextTick, onMounted } from "@vue/runtime-core";
 import Router from "./Router";
 import { LiveClient, IStudio, IInvalidModelDescription, Studio } from "./LinkClient";
 import ErrorModal from "./components/ErrorModal.vue";
-import ChatHub from "./components/ChatHub.vue";
+import ChatHub from "./components/LiveChatHub.vue";
 
 const errorMsg = ref("");
 
