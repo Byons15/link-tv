@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { nextTick, onMounted } from "@vue/runtime-core";
 import $ from "jquery";
+import { ref } from "vue";
 
-const props = defineProps({
-  msg: {
-    type: String,
-    default: "不知道什么原因",
-  },
+interface Props {
+  msg: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  msg: "不知道什么原因"
 });
+
+const modalContainer = ref<HTMLDivElement>();
 
 onMounted(() => {
   nextTick(() => {
-    $("#errorToast").toast("show");
   });
 });
 </script>
@@ -20,8 +23,8 @@ onMounted(() => {
   <div
     aria-live="polite"
     aria-atomic="true"
-    class="position-fixed w-100 h-100"
-    style="left: 0; top: 0; z-index: 2048;"
+    class="position-absolute"
+    style="left: 0; top: 0; z-index: 2000;"
   >
     <div class="w-100 d-flex justify-content-center mt-4">
       <div

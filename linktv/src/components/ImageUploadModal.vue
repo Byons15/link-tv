@@ -108,6 +108,7 @@ function onUpload() {
         })
         .catch(() => {
           unknownError.value = true;
+          
         })
         .then(() => {
           emits("uploadedEvent");
