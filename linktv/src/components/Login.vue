@@ -9,9 +9,8 @@ import {
   Login,
   UserClient,
 } from "../LinkClient";
-import ErrorModal from "./ErrorModal.vue";
+import * as Utils from "../Utils";
 
-const unknownError = ref(false);
 const emits = defineEmits(["loginedEvent"]);
 
 const userClient = new UserClient();
@@ -63,7 +62,7 @@ function onLogin() {
       }
     })
     .catch(() => {
-      unknownError.value = true;
+      Utils.errorModal.value.show();
     })
     .finally(() => {
       logging.value = false;
@@ -126,8 +125,5 @@ function onLogin() {
         <span class="sr-only">Loading...</span>
       </div>
     </button>
-    <Teleport to='body' v-if="unknownError">
-      <ErrorModal></ErrorModal>
-    </Teleport>
   </form>
 </template>

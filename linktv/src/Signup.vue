@@ -8,9 +8,7 @@ import {
   UserCore,
 } from "./LinkClient";
 import axios from "axios";
-import ErrorModal from "./components/ErrorModal.vue";
-
-const unknonwError = ref(false);
+import { errorModal } from "./Utils";
 
 const userName = ref("");
 const userNameInvalidMsg = ref("");
@@ -147,7 +145,7 @@ function submit() {
         errors["Password"] !== undefined ? errors["Password"][0] : '';
     })
     .catch(()=>{
-      unknonwError.value = true;
+      errorModal.value.show();
     });
 }
 
@@ -259,7 +257,6 @@ function onClose() {
         <button class="btn btn-primary w-25" @click="submit">注册</button>
       </div>
     </div>
-    <ErrorModal v-if="unknonwError"></ErrorModal>
   </div>
 </template>
 

@@ -9,7 +9,7 @@ import {
   IInvalidModelDescription,
   UserClient,
 } from "../LinkClient";
-import ErrorModal from "./ErrorModal.vue";
+import * as Utils from "../Utils";
 
 const emits = defineEmits(["cancelEvent", "uploadedEvent"]);
 
@@ -89,8 +89,6 @@ function onFileInputChanged() {
   reader.readAsDataURL(fileInputElement.value.files[0]);
 }
 
-const unknownError = ref(false);
-
 function onUpload() {
   if (cropper === undefined) return;
 
@@ -107,8 +105,7 @@ function onUpload() {
           fileName: fileInputElement.value.files[0].name,
         })
         .catch(() => {
-          unknownError.value = true;
-          
+          Utils.errorModal.value.show();
         })
         .then(() => {
           emits("uploadedEvent");
@@ -172,7 +169,6 @@ onMounted(() => {
         </button>
       </div>
     </div>
-    <ErrorModal v-if="unknownError"></ErrorModal>
   </div>
 </template>
 

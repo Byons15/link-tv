@@ -8,8 +8,6 @@ import "./linktv.css"
 import Router from './Router'
 import axios from "axios";
 
-axios.defaults.headers.common["Authorization"] =
-    "Bearer " + (localStorage.getItem("token") != null ? localStorage.getItem("token") : '');
 
 const app = createApp(App)
 app.use(Router)

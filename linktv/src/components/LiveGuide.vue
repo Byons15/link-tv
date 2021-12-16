@@ -2,15 +2,14 @@
 import { computed, ref } from "@vue/reactivity";
 import { watch, watchEffect } from "@vue/runtime-core";
 import { LiveClient } from "../LinkClient";
-import ErrorModal from "./ErrorModal.vue";
+import "../Utils";
+import { errorModal } from "../Utils";
 
 const props = defineProps({
   logined: Boolean,
 });
 
 const pushUrl = ref("");
-
-const unknownError = ref(false);
 
 watch(
   () => props.logined,
@@ -24,7 +23,7 @@ watch(
       const live = new LiveClient();
       live.pushAddress(0)
       .catch(()=>{
-        unknownError.value = true;
+        errorModal.value.show();
       })
       .then((address: string)=>{
         pushUrl.value = address;
@@ -73,8 +72,5 @@ function onCopyPushUrl() {
       </span>
     </div>
     <div class="small text-secondary">该地址仅24小时内有效。</div>
-    <Teleport to='body' v-if="unknownError">
-      <ErrorModal></ErrorModal>
-    </Teleport>
   </div>
 </template>

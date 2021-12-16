@@ -3,9 +3,7 @@ import TVCard from "./TVCard.vue";
 import { nextTick, onMounted } from "@vue/runtime-core";
 import { ref } from "vue";
 import { LiveClient, Studio } from "../LinkClient";
-import ErrorModal from "./ErrorModal.vue";
-
-const unknownError =ref(false);
+import { errorModal } from "../Utils";
 
 const lives = ref<Studio[]>();
 const empty = ref(false);
@@ -23,7 +21,9 @@ onMounted(() => {
     liveClient.all().then((studios: Studio[])=>{
       lives.value = studios;
        empty.value = lives.value.length == 0 ? true : false;
-    })
+    }).catch(()=>{
+      errorModal.value.show();
+    });
 
   });
 });
@@ -51,9 +51,6 @@ onMounted(() => {
       :key="i"
       v-else
     ></TVCard>
-    <Teleport to='body' v-if="unknownError">
-      <ErrorModal></ErrorModal>
-    </Teleport>
   </div>
 </template>
 

@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import * as SignalR from "@microsoft/signalr";
 import { inject, nextTick, onMounted, ref } from "vue";
-import ErrorModal from "./ErrorModal.vue";
+import * as Utils from "../Utils";
+import {IUserDTO, UserClient, UserDTO} from "../LinkClient";
 
 let connection: SignalR.HubConnection;
-
-const haveError = ref("");
-const errorModal = ref("");
-
-const globalUtils = inject<any>("globalUtils");
+const userName = ref("");
+let userId = 0;
 
 onMounted(() => {
   nextTick(() => {
@@ -19,13 +17,28 @@ onMounted(() => {
     .build();
 
     connection.start().catch((error)=>{
-        globalUtils.showError(error);
+        Utils.errorModal.value.show(error);
+    }).then(()=>{
+
+      const client = new UserClient();
+      client.get(0).then((user: IUserDTO)=>{
+        userName.value = user.name;
+        userId = user.id;
+      }).catch(()=>{
+        Utils.errorModal.value.show();
+      });
+
+      connection.send("IntoLiveChat", userId).catch(()=>{
+        Utils.errorModal.value.show();
+      }).then(()=>{
+        console.log("成功进入聊天室");
+      });
     });
   });
 });
 
 function onSend(){
-    globalUtils.showError("fhose");
+    connection.send("SendToLiveChat", )
 }
 
 </script>
@@ -42,7 +55,6 @@ function onSend(){
         <button class="btn btn-primary btn-sm" @click="onSend">发送</button>
       </span>
     </div>
-    <ErrorModal v-if="haveError != ''" :msg="haveError" ref="errorModal"></ErrorModal>
   </div>
 </template>
 

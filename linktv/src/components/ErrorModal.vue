@@ -3,18 +3,26 @@ import { nextTick, onMounted } from "@vue/runtime-core";
 import $ from "jquery";
 import { ref } from "vue";
 
-interface Props {
-  msg: string
-}
+const showing = ref(false);
+const msg = ref("不知道什么原因");
 
-const props = withDefaults(defineProps<Props>(), {
-  msg: "不知道什么原因"
+const show = ref<(errorMsg:string)=>void>();
+
+defineExpose({
+  show
 });
-
-const modalContainer = ref<HTMLDivElement>();
 
 onMounted(() => {
   nextTick(() => {
+    show.value = function (errorMsg?: string) {
+      msg.value = errorMsg !== null ? errorMsg : "不知道什么原因";
+      showing.value = true;
+      $("#errorToast").toast('show');
+    }
+
+    $("#errorToast").on("hidden.bs.toast", () =>{
+        showing.value = false;
+      });
   });
 });
 </script>
@@ -23,8 +31,10 @@ onMounted(() => {
   <div
     aria-live="polite"
     aria-atomic="true"
-    class="position-absolute"
-    style="left: 0; top: 0; z-index: 2000;"
+    v-show="showing"
+    class="position-absolute w-100 modal-container"
+    style="top: 0;"
+    id="toast-container"
   >
     <div class="w-100 d-flex justify-content-center mt-4">
       <div
@@ -69,3 +79,14 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.modal-container{
+  pointer-events: none;
+}
+
+.toast{
+  pointer-events: all;
+}
+
+</style>
