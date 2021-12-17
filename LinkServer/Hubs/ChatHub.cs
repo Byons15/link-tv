@@ -9,18 +9,21 @@ namespace LinkServer.Hubs
     {
         public async Task IntoLiveChat(long liveId)
         {
+            System.Console.WriteLine($"{Context.ConnectionId}进入了聊天室{liveId}");
             await Groups.AddToGroupAsync(Context.ConnectionId, liveId.ToString());
         }
 
         public async Task LeaveLiveChat(long liveId)
         {
+            System.Console.WriteLine($"{Context.ConnectionId}退出了聊天室{liveId}");
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, liveId.ToString());
         }
 
-        [Authorize]
-        public async Task SendToLiveChat(long liveId, LiveChatMessage message)
+        public Task SendToLiveChat(LiveChatMessage message)
         {
-            await Clients.Group(liveId.ToString()).SendAsync("liveChatReceived", message);
+            System.Console.WriteLine($"{message.Name}有新的消息");
+            //await Clients.Group(liveId.ToString()).SendAsync("liveChatReceived", message);
+            return Clients.All.SendAsync("liveChatReceived", message);
         }
     }
 

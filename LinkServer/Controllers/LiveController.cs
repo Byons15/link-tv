@@ -138,7 +138,6 @@ namespace LinkServer.Controllers
         [UserAction]
         public string PushAddress(long id)
         {
-            Console.WriteLine("push");
             return liveService.PushAddress(id);
         }
     }

@@ -79,7 +79,6 @@ function onVolumeChange(newVol){
 };
 
 onBeforeUnmount(() => {
-  danmakuView.destroy();
   erd.uninstall();
 });
 

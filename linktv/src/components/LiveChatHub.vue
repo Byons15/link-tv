@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import $ from 'jquery';
 import * as SignalR from "@microsoft/signalr";
 import { inject, nextTick, onMounted, ref } from "vue";
 import * as Utils from "../Utils";
@@ -17,33 +18,19 @@ let liveId = 0;
 onMounted(() => {
   nextTick(() => {
     liveId = Number(Router.currentRoute.value.params.id as string);
-    connection = new SignalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5000/chatHub", {
-        accessTokenFactory: () => {
-          return userStore.token;
-        },
-      })
-      .build();
+    connection = new SignalR.HubConnectionBuilder().withUrl("http://localhost:5000/ChatHub", {accessTokenFactory: ()=>
+         userStore.token
+      }).build();
 
-    connection
-      .start()
-      .catch((error) => {
+    connection.on("liveChatReceived", (msg)=>{
+      console.log(msg);
+    });
+
+    connection.start().catch((error) => {
         errorModal.value.show();
-      })
-      .then(() => {
-        connection
-          .send("IntoLiveChat", liveId)
-          .catch(() => {
-            errorModal.value.show();
-          })
-          .then(() => {
-            console.log("成功进入聊天室");
-          });
+      }).then(()=>{
+        console.log("聊天hub连接成功");
       });
-    
-    connection.on("liveChatReceived", ()=>{
-      console.log("新消息");
-    })
   });
 });
 
@@ -51,12 +38,16 @@ function onSend() {
   if (message.value.length == 0) return;
 
   connection
-    .send("SendToLiveChat", liveId, {
-      name: userStore.name,
-      message: "dfaew",
+    .send("SendToLiveChat", {
+      Name: userStore.name,
+      Message: message.value,
     })
-    .catch(() => {
-      errorModal.value.show();
+    .catch((error) => {
+      console.log(error);
+      errorModal.value.show(error);
+    })
+    .then(()=>{
+      console.log("发送完成");
     })
     .finally(() => {
       message.value = "";

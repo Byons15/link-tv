@@ -23,6 +23,7 @@ using NSwag.Generation.Processors.Security;
 using Newtonsoft.Json.Serialization;
 using LinkServer.Hubs;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 
 namespace LinkServer
 {
@@ -215,8 +216,8 @@ namespace LinkServer
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<ChatHub>("/ChatHub");
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }
