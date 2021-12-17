@@ -2,7 +2,7 @@
 import { ref } from "@vue/reactivity";
 import Player from "./components/LivePlayer.vue";
 import Navbar from "./components/navbar.vue";
-import { nextTick, onMounted } from "@vue/runtime-core";
+import { inject, nextTick, onMounted } from "@vue/runtime-core";
 import Router from "./Router";
 import {
   LiveClient,
@@ -11,9 +11,10 @@ import {
   Studio,
 } from "./LinkClient";
 import ChatHub from "./components/LiveChatHub.vue";
-import { errorModal } from "./Utils";
 
 const playerWidescreen = ref(false);
+
+const errorModal = inject<any>("errorModal");
 
 const tvName = ref<string>();
 const director = ref<string>();

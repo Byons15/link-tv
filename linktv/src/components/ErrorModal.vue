@@ -6,7 +6,12 @@ import { ref } from "vue";
 const showing = ref(false);
 const msg = ref("不知道什么原因");
 
-const show = ref<(errorMsg:string)=>void>();
+function show(message?: string) {
+  msg.value =
+    message !== null && message !== undefined ? message : "不知道什么原因";
+  showing.value = true;
+  $("#errorToast").toast("show");
+}
 
 defineExpose({
   show
@@ -14,15 +19,9 @@ defineExpose({
 
 onMounted(() => {
   nextTick(() => {
-    show.value = function (errorMsg?: string) {
-      msg.value = errorMsg !== null ? errorMsg : "不知道什么原因";
-      showing.value = true;
-      $("#errorToast").toast('show');
-    }
-
-    $("#errorToast").on("hidden.bs.toast", () =>{
-        showing.value = false;
-      });
+    $("#errorToast").on("hidden.bs.toast", () => {
+      showing.value = false;
+    });
   });
 });
 </script>
@@ -33,7 +32,7 @@ onMounted(() => {
     aria-atomic="true"
     v-show="showing"
     class="position-absolute w-100 modal-container"
-    style="top: 0;"
+    style="top: 0"
     id="toast-container"
   >
     <div class="w-100 d-flex justify-content-center mt-4">
@@ -81,12 +80,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.modal-container{
+.modal-container {
   pointer-events: none;
 }
 
-.toast{
+.toast {
   pointer-events: all;
 }
-
 </style>

@@ -2,7 +2,7 @@
 import { ref } from "@vue/reactivity";
 import Router from "../Router";
 import axios, { AxiosResponse } from "axios";
-import { nextTick, onBeforeUpdate, onMounted } from "@vue/runtime-core";
+import { inject, nextTick, onBeforeUpdate, onMounted } from "@vue/runtime-core";
 import {
   IInternalErrorDescription,
   IInvalidModelDescription,
@@ -11,18 +11,18 @@ import {
 } from "../LinkClient";
 import * as Utils from "../Utils";
 
-const emits = defineEmits(["loginedEvent"]);
-
 const userClient = new UserClient();
 
 const userName = ref("");
 const password = ref("");
 
+const userStore = inject<Utils.IUserStore>("userStore");
+const errorModal = inject<any>("errorModal");
+
 onMounted(() => {
   nextTick(() => {
-    if (localStorage.getItem("token") != null) {
-      emits("loginedEvent");
-    }
+    if(userStore.logined)
+      throw "使用登录面板前请先注销";
   });
 });
 
@@ -46,9 +46,7 @@ function onLogin() {
       password: password.value,
     })
     .then((response: string) => {
-      axios.defaults.headers.common["Authorization"] = "Bearer " + response;
-      localStorage.setItem("token", response);
-      emits("loginedEvent");
+      userStore.login(response);
     })
     .catch((response: IInvalidModelDescription) => {
       if (response.errors["Name"] !== undefined) {
@@ -62,7 +60,7 @@ function onLogin() {
       }
     })
     .catch(() => {
-      Utils.errorModal.value.show();
+      errorModal.value.show();
     })
     .finally(() => {
       logging.value = false;

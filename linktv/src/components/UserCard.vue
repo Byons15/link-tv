@@ -1,74 +1,23 @@
 <script setup lang="ts">
-import { ref } from "@vue/reactivity";
-import axios from "axios";
-import { UserClient, UserDTO } from "../LinkClient";
 import ImageUploadModal from "./ImageUploadModal.vue";
 import JQuery from "jquery";
-import { errorModal } from "../Utils";
+import { inject } from "@vue/runtime-core";
+import { IUserStore } from "../Utils";
 
-const name = ref("");
-const id = ref(null);
-const email = ref();
-const image = ref("./src/assets/user.png");
-
-const emits = defineEmits(["logoutEvent"]);
-
-const client = new UserClient();
-
-const showImageUploadModal = ref(false);
-
-client.get(0).then((user: UserDTO) => {
-  name.value = user.name;
-  id.value = user.id;
-  email.value = user.email;
-  if (user.image !== undefined) {
-    var file = user.image as any;
-    image.value = "data:" + file.contentType + ";base64," + file.fileContents;
-  }
-
-  showImageUploadModal.value = false;
-});
-
-const logoutConfirm = ref(false);
-
-const imageUploadModalElement = ref(null);
+let userSore = inject<IUserStore>("userStore");
 
 function onImageUploadCancel() {
   JQuery("#imageUploadModal").modal("hide");
 }
 
-function onUserImageUploaded() {
-  onImageUploadCancel();
-
-  client.get(0)
-  .catch(()=>{
-    errorModal.value.show();
-  })
-  .then((user: UserDTO) => {
-    name.value = user.name;
-    id.value = user.id;
-    email.value = user.email;
-    if (user.image !== undefined) {
-      var file = user.image as any;
-      image.value = "data:" + file.contentType + ";base64," + file.fileContents;
-    }
-
-    showImageUploadModal.value = false;
-  });
-}
-
-function toggleLogoutConfirmModal(state:string){
+function toggleLogoutConfirmModal(state: string) {
   JQuery("#logoutConfirmModal").modal(state);
 }
 
 function onLogout() {
-  toggleLogoutConfirmModal('hide');
-
-  localStorage.removeItem("token");
-  axios.defaults.headers.common["Authorization"] = "";
-  emits("logoutEvent");
+  toggleLogoutConfirmModal("hide");
+  userSore.logout();
 }
-
 </script>
 
 <template>
@@ -89,7 +38,11 @@ function onLogout() {
             alt=""
             class="align-self-center img-fluid"
             style="width: 4em; height: 4em"
-            :src="image"
+            :src="
+              userSore.image != undefined
+                ? userSore.image
+                : './src/assets/user.png'
+            "
           />
           <div
             class="position-absolute"
@@ -130,23 +83,22 @@ function onLogout() {
                 >
                   <ImageUploadModal
                     @cancel-event="onImageUploadCancel"
-                    @uploaded-event="onUserImageUploaded"
                   ></ImageUploadModal>
                 </div>
               </Teleport>
             </div>
           </div>
         </div>
-        <span class="align-self-center">{{ name }}</span>
+        <span class="align-self-center">{{ userSore.name }}</span>
         <table class="table table-borderless table-sm mt-3">
           <tbody>
             <tr>
               <td align="right">id:</td>
-              <td>{{ id }}</td>
+              <td>{{ userSore.id }}</td>
             </tr>
             <tr>
               <td align="right">email:</td>
-              <td>{{ email }}</td>
+              <td>{{ userSore.email }}</td>
             </tr>
           </tbody>
         </table>
@@ -200,7 +152,6 @@ function onLogout() {
 </template>
 
 <style scoped>
-
 .image-box {
   color: transparent;
   cursor: pointer;

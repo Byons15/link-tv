@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "@vue/reactivity";
-import { nextTick, onMounted } from "@vue/runtime-core";
+import { inject, nextTick, onMounted } from "@vue/runtime-core";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 import {
@@ -9,11 +9,14 @@ import {
   IInvalidModelDescription,
   UserClient,
 } from "../LinkClient";
-import * as Utils from "../Utils";
+import { IUserStore } from "../Utils";
 
-const emits = defineEmits(["cancelEvent", "uploadedEvent"]);
+const emits = defineEmits(["cancelEvent"]);
 
 const fileLabel = ref("导入图片以进行编辑。");
+
+const errorModal = inject<any>("errorModal");
+const userStore = inject<IUserStore>("userStore");
 
 const fileInputElement = ref<HTMLInputElement>();
 
@@ -105,10 +108,10 @@ function onUpload() {
           fileName: fileInputElement.value.files[0].name,
         })
         .catch(() => {
-          Utils.errorModal.value.show();
+          errorModal.value.show();
         })
         .then(() => {
-          emits("uploadedEvent");
+          userStore.update();
         });
     });
 }

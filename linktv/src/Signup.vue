@@ -8,7 +8,11 @@ import {
   UserCore,
 } from "./LinkClient";
 import axios from "axios";
-import { errorModal } from "./Utils";
+import { inject } from "@vue/runtime-core";
+import { IUserStore } from "./Utils";
+
+const errorModal = inject<any>("errorModal");
+const userStore = inject<IUserStore>("userStore");
 
 const userName = ref("");
 const userNameInvalidMsg = ref("");
@@ -124,9 +128,7 @@ function submit() {
       password: password.value,
     })
     .then((token: string) => {
-      localStorage.setItem("token", token);
-      axios.defaults.headers.common["Authorization"] =
-        "Bearer " + localStorage.getItem("token");
+      userStore.login(token);
       Router.push("/home");
     })
     .catch((invalidResponse: IInvalidModelDescription) => {

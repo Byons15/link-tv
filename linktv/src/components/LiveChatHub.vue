@@ -2,45 +2,66 @@
 import * as SignalR from "@microsoft/signalr";
 import { inject, nextTick, onMounted, ref } from "vue";
 import * as Utils from "../Utils";
-import {IUserDTO, UserClient, UserDTO} from "../LinkClient";
+import Router from "../router";
 
 let connection: SignalR.HubConnection;
 const userName = ref("");
 let userId = 0;
 
+const errorModal = inject<any>("errorModal");
+const userStore = inject<Utils.IUserStore>("userStore");
+
+const message = ref("");
+let liveId = 0;
+
 onMounted(() => {
   nextTick(() => {
+    liveId = Number(Router.currentRoute.value.params.id as string);
     connection = new SignalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5000/chatHub", { accessTokenFactory: () =>{
-        return localStorage.getItem("token");
-    } })
-    .build();
+      .withUrl("http://localhost:5000/chatHub", {
+        accessTokenFactory: () => {
+          return userStore.token;
+        },
+      })
+      .build();
 
-    connection.start().catch((error)=>{
-        Utils.errorModal.value.show(error);
-    }).then(()=>{
-
-      const client = new UserClient();
-      client.get(0).then((user: IUserDTO)=>{
-        userName.value = user.name;
-        userId = user.id;
-      }).catch(()=>{
-        Utils.errorModal.value.show();
+    connection
+      .start()
+      .catch((error) => {
+        errorModal.value.show();
+      })
+      .then(() => {
+        connection
+          .send("IntoLiveChat", liveId)
+          .catch(() => {
+            errorModal.value.show();
+          })
+          .then(() => {
+            console.log("成功进入聊天室");
+          });
       });
-
-      connection.send("IntoLiveChat", userId).catch(()=>{
-        Utils.errorModal.value.show();
-      }).then(()=>{
-        console.log("成功进入聊天室");
-      });
-    });
+    
+    connection.on("liveChatReceived", ()=>{
+      console.log("新消息");
+    })
   });
 });
 
-function onSend(){
-    connection.send("SendToLiveChat", )
-}
+function onSend() {
+  if (message.value.length == 0) return;
 
+  connection
+    .send("SendToLiveChat", liveId, {
+      name: userStore.name,
+      message: "dfaew",
+    })
+    .catch(() => {
+      errorModal.value.show();
+    })
+    .finally(() => {
+      message.value = "";
+    });
+}
 </script>
 
 <template>
@@ -50,7 +71,7 @@ function onSend(){
       style="overflow-y: auto; overflow-x: hidden"
     ></div>
     <div class="input-group">
-      <input type="text" class="form-control" />
+      <input type="text" class="form-control" v-model="message" />
       <span class="input-group-append">
         <button class="btn btn-primary btn-sm" @click="onSend">发送</button>
       </span>

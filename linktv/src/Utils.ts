@@ -1,10 +1,13 @@
 import {ref} from 'vue';
 
-export const onlineUser = {
-    id: 0,
-    name: "",
-    token: "",
-    email: ""
+export interface IUserStore{
+    id?: number,
+    name?: string,
+    email?: string,
+    image?: string,
+    token?: string,
+    logined?: boolean,
+    login?:(token: string)=>void,
+    logout?: ()=>void,
+    update?: ()=>void,
 }
-
-export const errorModal = ref(null);;
