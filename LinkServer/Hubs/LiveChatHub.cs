@@ -1,28 +1,33 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LinkServer.Hubs
 {
     
-    public class ChatHub :Hub
+    public class LiveChatHub :Hub
     {
         public async Task IntoLiveChat(string liveName)
         {
-            System.Console.WriteLine($"{Context.ConnectionId}进入了聊天室{liveName}");
             await Groups.AddToGroupAsync(Context.ConnectionId, liveName);
+
+            //if (!Context.Items.TryGetValue("groups", out _))
+            //    Context.Items.Add("groups", new List<string>());
+
+            //(Context.Items["groups"] as List<string>).Add(liveName);
         }
 
         public async Task LeaveLiveChat(string liveName)
         {
-            System.Console.WriteLine($"{Context.ConnectionId}退出了聊天室{liveName}");
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, liveName);
         }
 
+        [Authorize]
         public async Task SendToLiveChat(LiveChatMessage message)
         {
-            System.Console.WriteLine($"{message.Name}有新的消息");
             await Clients.Group(message.LiveName).SendAsync("liveChatReceived", message);
         }
     }

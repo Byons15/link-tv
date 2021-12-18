@@ -78,7 +78,7 @@ namespace LinkServer
                             }
                             var accessToken = context.HttpContext.Request.Query["access_token"];
                             var path = context.HttpContext.Request.Path;
-                            if (!(string.IsNullOrWhiteSpace(accessToken)) && path.StartsWithSegments("/chat"))
+                            if (!(string.IsNullOrWhiteSpace(accessToken)) && path.StartsWithSegments("/LiveChatHub"))
                             {
                                 context.Token = accessToken;
                                 return Task.CompletedTask;
@@ -216,7 +216,7 @@ namespace LinkServer
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHub<ChatHub>("/ChatHub");
+                endpoints.MapHub<LiveChatHub>("/LiveChatHub");
                 endpoints.MapControllers();
             });
         }

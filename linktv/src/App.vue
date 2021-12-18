@@ -37,7 +37,7 @@ userStore.logout = ()=>{
   userStore.name = '';
 
   axios.defaults.headers.common["Authorization"] = '';
-  localStorage.remove("token");
+  localStorage.removeItem("token");
 };
 
 userStore.update = ()=>{

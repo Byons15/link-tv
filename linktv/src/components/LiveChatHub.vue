@@ -16,11 +16,13 @@ const props = defineProps({
   liveName: String,
 });
 
-interface ILiveChatMessage {
-  liveName: string;
-  name: string;
-  message: string;
+class LiveChatMessage {
+  liveName?: string;
+  name?: string;
+  message?: string;
 }
+
+const messageList = ref<LiveChatMessage[]>(new Array<LiveChatMessage>());
 
 function connectToServer() {
   if (
@@ -32,7 +34,7 @@ function connectToServer() {
 
   console.log("正在进入", props.liveName, "的直播间");
   connection = new SignalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5000/ChatHub", {
+    .withUrl("http://localhost:5000/LiveChatHub", {
       accessTokenFactory: () => userStore.token,
     })
     .configureLogging(SignalR.LogLevel.Debug)
@@ -72,7 +74,7 @@ function onSend() {
   if (message.value.length == 0) return;
 
   connection
-    .send("SendToLiveChat", <ILiveChatMessage>{
+    .send("SendToLiveChat", <LiveChatMessage>{
       liveName: props.liveName,
       name: userStore.name,
       message: message.value,
@@ -95,7 +97,9 @@ function onSend() {
     <div
       class="flex-grow-1 bg-light"
       style="overflow-y: auto; overflow-x: hidden"
-    ></div>
+    >
+    <p v-for="(msg, i) in messageList" :key="i">{{msg.name}}: {{msg.message}}</p>
+    </div>
     <div class="input-group">
       <input type="text" class="form-control" v-model="message" />
       <span class="input-group-append">
