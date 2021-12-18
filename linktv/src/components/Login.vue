@@ -59,7 +59,8 @@ function onLogin() {
         invalidPasswordDesc.value = response.errors["Password"][0];
       }
     })
-    .catch(() => {
+    .catch((error) => {
+      console.log(error);
       errorModal.value.show();
     })
     .finally(() => {

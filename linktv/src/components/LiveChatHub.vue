@@ -4,6 +4,8 @@ import * as SignalR from "@microsoft/signalr";
 import { inject, nextTick, onMounted, ref } from "vue";
 import * as Utils from "../Utils";
 import { watch } from "vue";
+import { getHashes, Hash, randomBytes } from "crypto";
+import { Md5 } from "ts-md5/dist/md5";
 
 let connection: SignalR.HubConnection;
 
@@ -23,6 +25,7 @@ class LiveChatMessage {
 }
 
 const messageList = ref<LiveChatMessage[]>(new Array<LiveChatMessage>());
+const chatContainer = ref<HTMLDivElement>();
 
 function connectToServer() {
   if (
@@ -40,8 +43,15 @@ function connectToServer() {
     .configureLogging(SignalR.LogLevel.Debug)
     .build();
 
-  connection.on("liveChatReceived", (msg) => {
-    console.log(msg);
+  connection.on("liveChatReceived", (msg: LiveChatMessage) => {
+    messageList.value.push(msg);
+    nextTick(() => {
+      if (
+        chatContainer.value.scrollHeight !== undefined &&
+        chatContainer.value.scrollHeight != null
+      )
+        chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+    });
   });
 
   connection
@@ -51,16 +61,39 @@ function connectToServer() {
     })
     .then(() => {
       console.log("聊天hub连接成功");
-      connection.send("IntoLiveChat", props.liveName).then(() => {
-        console.log("成功进入直播间聊天室");
-      });
+      connection
+        .send("IntoLiveChat", {
+          liveName: props.liveName,
+          name: userStore.logined
+            ? userStore.name
+            : "游客" + Md5.hashStr(connection.connectionId).substring(0, 8),
+          message: "",
+        })
+        .then(() => {
+          console.log("成功进入直播间聊天室");
+        });
     });
 }
 
 watch(
   () => props.liveName,
   () => {
-    connectToServer();
+    if (connection != null)
+      connection.stop().then(() => {
+        connectToServer();
+      });
+    else connectToServer();
+  }
+);
+
+watch(
+  () => userStore.logined,
+  () => {
+    if (connection != null)
+      connection.stop().then(() => {
+        connectToServer();
+      });
+    else connectToServer();
   }
 );
 
@@ -83,9 +116,7 @@ function onSend() {
       console.log(error);
       errorModal.value.show(error);
     })
-    .then(() => {
-      console.log("发送完成");
-    })
+    .then(() => {})
     .finally(() => {
       message.value = "";
     });
@@ -96,21 +127,34 @@ function onSend() {
   <div class="d-flex flex-column px-0 chatHub-container">
     <div
       class="flex-grow-1 bg-light"
-      style="overflow-y: auto; overflow-x: hidden"
+      style="overflow-y: auto"
+      ref="chatContainer"
     >
-    <p v-for="(msg, i) in messageList" :key="i">{{msg.name}}: {{msg.message}}</p>
+      <p v-for="(msg, i) in messageList" :key="i" class="px-1 my-1 small">
+        {{ msg.name }}: {{ msg.message }}
+      </p>
+      <br />
     </div>
     <div class="input-group">
-      <input type="text" class="form-control" v-model="message" />
+      <input
+        type="text"
+        class="form-control"
+        v-model="message"
+        @keypress.enter="onSend"
+        :disabled="!(userStore.logined)"
+        :placeholder="userStore.logined ? '' : '请先登录'"
+      />
       <span class="input-group-append">
-        <button class="btn btn-primary btn-sm" @click="onSend">发送</button>
+        <button class="btn btn-primary btn-sm" @click="onSend" :disabled="!(userStore.logined)">发送</button>
       </span>
     </div>
   </div>
 </template>
 
 <style scoped>
-.chatHub-container {
-  height: 293px;
+p {
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;
 }
 </style>

@@ -7,17 +7,18 @@ using System.Threading.Tasks;
 
 namespace LinkServer.Hubs
 {
-    
     public class LiveChatHub :Hub
     {
-        public async Task IntoLiveChat(string liveName)
+        public async Task IntoLiveChat(LiveChatMessage model)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, liveName);
+            await Groups.AddToGroupAsync(Context.ConnectionId, model.LiveName);
 
-            //if (!Context.Items.TryGetValue("groups", out _))
-            //    Context.Items.Add("groups", new List<string>());
-
-            //(Context.Items["groups"] as List<string>).Add(liveName);
+            await Clients.Group(model.LiveName).SendAsync("liveChatReceived", new LiveChatMessage()
+            {
+                LiveName = model.LiveName,
+                Name = "系统消息",
+                Message = $"{model.Name}进入了直播间。"
+            });
         }
 
         public async Task LeaveLiveChat(string liveName)

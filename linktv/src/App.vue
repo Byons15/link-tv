@@ -26,7 +26,7 @@ userStore.login = (token: string) => {
   axios.defaults.headers.common["Authorization"] = "Bearer " + token;
   localStorage.setItem("token", token);
   userStore.update();
-  userStore.token;
+  userStore.token = token;
 };
 
 userStore.logout = ()=>{
@@ -58,10 +58,10 @@ userStore.update = ()=>{
     userStore.logout();
   })
   .catch((error)=>{
-    globalErrorModal.value.show();
-    userStore.logout();
     console.log("发生未预料的错误。");
     console.log(error);
+    globalErrorModal.value.show();
+    userStore.logout();
   });
 };
 
@@ -71,6 +71,7 @@ onMounted(() => {
   nextTick(() => {
     let token = localStorage.getItem("token");
     if(token != null){
+      console.log("检索到本地token, 准备尝试使用其登录");
       userStore.login(token);
     }
   });

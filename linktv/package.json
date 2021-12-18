@@ -20,6 +20,7 @@
     "jquery": "^3.6.0",
     "jquery-cropper": "^1.0.1",
     "popper.js": "^1.16.1",
+    "ts-md5": "^1.2.10",
     "vue": "^3.2.22",
     "vue-router": "^4.0.12"
   },

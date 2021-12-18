@@ -68,7 +68,7 @@ onMounted(() => {
   <div>
     <Navbar></Navbar>
     <div class="container">
-      <div class="row">
+      <div class="row w-100 h-100">
         <Player
           class="col-12"
           :title="tvName"
@@ -79,7 +79,7 @@ onMounted(() => {
           ref="playerRef"
         ></Player>
         <ChatHub
-          :class="{ 'col-md-3': !playerWidescreen }"
+          class="chat-hub d-none col-md-3"
           v-if="!playerWidescreen"
           :live-name="liveName"
         ></ChatHub>
@@ -87,3 +87,41 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+
+.chat-hub {
+      opacity: 1;
+}
+
+@media screen and (max-width: 576px) {
+  .chat-hub {
+    opacity: 0;
+  }
+}
+
+@media screen and (min-width: 576px)and (max-width: 768px) {
+  .chat-hub {
+    opacity: 0;
+  }
+}
+
+@media screen and (min-width: 768px) and ( max-width:992px ) {
+  .chat-hub {
+    height: 344px;
+  }
+}
+
+@media screen and (min-width: 992px) and (max-width: 1200px){
+  .chat-hub {
+    height: 445px;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .chat-hub {
+   height: 522px;
+  }
+}
+
+</style>
