@@ -1,36 +1,70 @@
 <script setup lang="ts">
-import $ from 'jquery';
+import $ from "jquery";
 import * as SignalR from "@microsoft/signalr";
 import { inject, nextTick, onMounted, ref } from "vue";
 import * as Utils from "../Utils";
-import Router from "../router";
+import { watch } from "vue";
 
 let connection: SignalR.HubConnection;
-const userName = ref("");
-let userId = 0;
 
 const errorModal = inject<any>("errorModal");
 const userStore = inject<Utils.IUserStore>("userStore");
 
 const message = ref("");
-let liveId = 0;
+
+const props = defineProps({
+  liveName: String,
+});
+
+interface ILiveChatMessage {
+  liveName: string;
+  name: string;
+  message: string;
+}
+
+function connectToServer() {
+  if (
+    props.liveName === undefined ||
+    props.liveName.length == 0 ||
+    props.liveName == "0"
+  )
+    return;
+
+  console.log("正在进入", props.liveName, "的直播间");
+  connection = new SignalR.HubConnectionBuilder()
+    .withUrl("http://localhost:5000/ChatHub", {
+      accessTokenFactory: () => userStore.token,
+    })
+    .configureLogging(SignalR.LogLevel.Debug)
+    .build();
+
+  connection.on("liveChatReceived", (msg) => {
+    console.log(msg);
+  });
+
+  connection
+    .start()
+    .catch((error) => {
+      errorModal.value.show();
+    })
+    .then(() => {
+      console.log("聊天hub连接成功");
+      connection.send("IntoLiveChat", props.liveName).then(() => {
+        console.log("成功进入直播间聊天室");
+      });
+    });
+}
+
+watch(
+  () => props.liveName,
+  () => {
+    connectToServer();
+  }
+);
 
 onMounted(() => {
   nextTick(() => {
-    liveId = Number(Router.currentRoute.value.params.id as string);
-    connection = new SignalR.HubConnectionBuilder().withUrl("http://localhost:5000/ChatHub", {accessTokenFactory: ()=>
-         userStore.token
-      }).build();
-
-    connection.on("liveChatReceived", (msg)=>{
-      console.log(msg);
-    });
-
-    connection.start().catch((error) => {
-        errorModal.value.show();
-      }).then(()=>{
-        console.log("聊天hub连接成功");
-      });
+    connectToServer();
   });
 });
 
@@ -38,15 +72,16 @@ function onSend() {
   if (message.value.length == 0) return;
 
   connection
-    .send("SendToLiveChat", {
-      Name: userStore.name,
-      Message: message.value,
+    .send("SendToLiveChat", <ILiveChatMessage>{
+      liveName: props.liveName,
+      name: userStore.name,
+      message: message.value,
     })
     .catch((error) => {
       console.log(error);
       errorModal.value.show(error);
     })
-    .then(()=>{
+    .then(() => {
       console.log("发送完成");
     })
     .finally(() => {

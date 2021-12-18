@@ -18,10 +18,11 @@ const errorModal = inject<any>("errorModal");
 
 const tvName = ref<string>();
 const director = ref<string>();
-let directorId: number = 0;
+const liveName = ref("");
+let directorId = 0;
 
-const liveUrl = "http://byons.tpddns.cn:62407/linktv?app=linktv&stream=";
-const videoSrc = ref(liveUrl + directorId);
+const liveUrl = "";
+const videoSrc = ref("");
 
 onMounted(() => {
   nextTick(() => {
@@ -37,6 +38,9 @@ onMounted(() => {
     //       videoSrc.value = response.data.flvAddress;
     //     }
     //   });
+
+    console.log(Router.currentRoute.value.params.id as string);
+
     const api = new LiveClient();
     api
       .get(Router.currentRoute.value.params.id as string)
@@ -53,6 +57,8 @@ onMounted(() => {
         director.value = studio.director;
         tvName.value = studio.name;
         videoSrc.value = studio.flvAddress;
+
+        liveName.value = directorId.toString();
       });
   });
 });
@@ -75,6 +81,7 @@ onMounted(() => {
         <ChatHub
           :class="{ 'col-md-3': !playerWidescreen }"
           v-if="!playerWidescreen"
+          :live-name="liveName"
         ></ChatHub>
       </div>
     </div>
