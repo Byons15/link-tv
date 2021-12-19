@@ -49,6 +49,7 @@ function onLogin() {
       userStore.login(response);
     })
     .catch((response: IInvalidModelDescription) => {
+      console.log(response);
       if (response.errors["Name"] !== undefined) {
         invalidName.value = true;
         invalidNameDesc.value = response.errors["Name"][0];

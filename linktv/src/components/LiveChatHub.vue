@@ -37,7 +37,7 @@ function connectToServer() {
 
   console.log("正在进入", props.liveName, "的直播间");
   connection = new SignalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5000/LiveChatHub", {
+    .withUrl("http://byons.site:5000/LiveChatHub", {
       accessTokenFactory: () => userStore.token,
     })
     .configureLogging(SignalR.LogLevel.Debug)
