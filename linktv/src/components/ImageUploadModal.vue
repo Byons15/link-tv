@@ -11,7 +11,7 @@ import {
 } from "../LinkClient";
 import { IUserStore } from "../Utils";
 
-const emits = defineEmits(["cancelEvent"]);
+const emits = defineEmits(["closeEvent"]);
 
 const fileLabel = ref("导入图片以进行编辑。");
 
@@ -112,6 +112,7 @@ function onUpload() {
         })
         .then(() => {
           userStore.update();
+          emits("closeEvent");
         });
     });
 }
@@ -126,7 +127,7 @@ onMounted(() => {
     <div class="modal-content">
       <div class="modal-header">
         <div class="modal-title">上传你的头像</div>
-        <button type="button" class="close" @click="$emit('cancelEvent')">
+        <button type="button" class="close" @click="$emit('closeEvent')">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -166,7 +167,7 @@ onMounted(() => {
         <button
           type="button"
           class="btn btn-secondary"
-          @click="$emit('cancelEvent')"
+          @click="$emit('closeEvent')"
         >
           取消
         </button>

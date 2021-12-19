@@ -37,6 +37,9 @@ function onUserNameBlur() {
   let userClient = new UserClient();
   userClient.validName(userName.value).then((available: boolean) => {
     userNameInvalidMsg.value = available ? "" : "用户名已经存在";
+  }).catch((error : IInvalidModelDescription)=>{
+    if(error.errors.name !== undefined)
+      userNameInvalidMsg.value = error.errors.name[0];
   });
 }
 

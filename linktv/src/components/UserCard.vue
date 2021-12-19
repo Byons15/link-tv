@@ -82,7 +82,7 @@ function onLogout() {
                   id="imageUploadModal"
                 >
                   <ImageUploadModal
-                    @cancel-event="onImageUploadCancel"
+                    @close-event="onImageUploadCancel"
                   ></ImageUploadModal>
                 </div>
               </Teleport>

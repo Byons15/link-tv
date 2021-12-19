@@ -47,7 +47,7 @@ userStore.update = ()=>{
     userStore.id = userDto.id;
     userStore.name = userDto.name;
     userStore.email = userDto.email;
-    if (userDto.image !== undefined) {
+    if (userDto.image !== null) {
       var file = userDto.image as any;
       userStore.image = "data:" + file.contentType + ";base64," + file.fileContents;
     }
