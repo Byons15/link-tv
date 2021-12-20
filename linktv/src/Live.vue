@@ -1,24 +1,29 @@
 <script setup lang="ts">
 import { ref } from "@vue/reactivity";
 import Player from "./components/LivePlayer.vue";
-import Telecasts from "./components/Telecasts.vue";
 import Navbar from "./components/navbar.vue";
-import { getCurrentInstance, nextTick, onMounted } from "@vue/runtime-core";
+import { inject, nextTick, onMounted } from "@vue/runtime-core";
 import Router from "./Router";
-import { LiveClient, IStudio } from "./LinkClient";
+import {
+  LiveClient,
+  IStudio,
+  IInvalidModelDescription,
+  Studio,
+} from "./LinkClient";
+import ChatHub from "./components/LiveChatHub.vue";
 
 const playerWidescreen = ref(false);
 
+const errorModal = inject<any>("errorModal");
+
 const tvName = ref<string>();
 const director = ref<string>();
-let directorId: number = 0;
+const liveName = ref("");
+let directorId = 0;
 
-const liveUrl = "http://byons.tpddns.cn:62407/linktv?app=linktv&stream=";
-const videoSrc = ref(liveUrl + directorId);
+const liveUrl = "";
+const videoSrc = ref("");
 
-interface Address {
-  address?: string;
-}
 onMounted(() => {
   nextTick(() => {
     console.log("live player on mounted");
@@ -33,14 +38,28 @@ onMounted(() => {
     //       videoSrc.value = response.data.flvAddress;
     //     }
     //   });
+
+    console.log(Router.currentRoute.value.params.id as string);
+
     const api = new LiveClient();
-    api.get(Router.currentRoute.value.params.id as string)
-    .then((studio: IStudio)=>{
-      directorId = studio.id;
-      director.value = studio.director;
-      tvName.value = studio.name;
-      videoSrc.value = studio.flvAddress;
-    })
+    api
+      .get(Router.currentRoute.value.params.id as string)
+      .catch((error: IInvalidModelDescription) => {
+        errorModal.value.show(
+          error.errors.name !== undefined ? error.errors.name[0] : "未知错误"
+        );
+      })
+      .catch(() => {
+        errorModal.value.show();
+      })
+      .then((studio: Studio) => {
+        directorId = studio.id;
+        director.value = studio.director;
+        tvName.value = studio.name;
+        videoSrc.value = studio.flvAddress;
+
+        liveName.value = directorId.toString();
+      });
   });
 });
 </script>
@@ -49,7 +68,7 @@ onMounted(() => {
   <div>
     <Navbar></Navbar>
     <div class="container">
-      <div class="row">
+      <div class="row w-100 h-100">
         <Player
           class="col-12"
           :title="tvName"
@@ -59,7 +78,50 @@ onMounted(() => {
           :class="{ 'col-md-9': !playerWidescreen }"
           ref="playerRef"
         ></Player>
+        <ChatHub
+          class="chat-hub d-none col-md-3"
+          v-if="!playerWidescreen"
+          :live-name="liveName"
+        ></ChatHub>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+
+.chat-hub {
+      opacity: 1;
+}
+
+@media screen and (max-width: 576px) {
+  .chat-hub {
+    opacity: 0;
+  }
+}
+
+@media screen and (min-width: 576px)and (max-width: 768px) {
+  .chat-hub {
+    opacity: 0;
+  }
+}
+
+@media screen and (min-width: 768px) and ( max-width:992px ) {
+  .chat-hub {
+    height: 344px;
+  }
+}
+
+@media screen and (min-width: 992px) and (max-width: 1200px){
+  .chat-hub {
+    height: 445px;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .chat-hub {
+   height: 522px;
+  }
+}
+
+</style>

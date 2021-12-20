@@ -1,26 +1,23 @@
 <script setup lang="ts">
 import TVCard from "./TVCard.vue";
-import { nextTick, onMounted } from "@vue/runtime-core";
+import { inject, nextTick, onMounted } from "@vue/runtime-core";
 import { ref } from "vue";
 import { LiveClient, Studio } from "../LinkClient";
 
 const lives = ref<Studio[]>();
-const empty = ref<boolean>(true);
+const empty = ref(false);
+
+const errorModal = inject<any>("errorModal");
 
 onMounted(() => {
   nextTick(() => {
-    // const liveApi = new LiveApi();
-    // liveApi.apiLiveGet().then((response) => {
-    //   if (response.status === 200) {
-    //     lives.value = response.data ;
-    //     empty.value = lives.value.length == 0 ? true : false;
-    //   }
-    // });
     const liveClient = new LiveClient();
     liveClient.all().then((studios: Studio[])=>{
       lives.value = studios;
-      empty.value = studios.length == 0 ? true : false;
-    })
+       empty.value = lives.value.length == 0 ? true : false;
+    }).catch(()=>{
+      errorModal.value.show();
+    });
 
   });
 });
@@ -28,14 +25,6 @@ onMounted(() => {
 
 <template>
   <div class="row">
-    <!-- <TVCard
-      class="col-3"
-      title="又是冲分的一天"
-      image_src="./src/assets/003.flv"
-      anchor_image_src="./src/assets/dy1.jfif"
-      anchor="旭旭宝宝"
-      attendance="2000"
-    ></TVCard> -->
     <div class='col-12 text-center' v-if="empty">什么都没有~~~</div>
     <TVCard
       v-for="(tv, i) in lives"

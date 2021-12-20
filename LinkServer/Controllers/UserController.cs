@@ -7,6 +7,9 @@ using LinkServer.Services;
 using LinkServer.DAO;
 using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace LinkServer.Controllers
 {
@@ -73,9 +76,9 @@ namespace LinkServer.Controllers
         /// <returns>用户信息</returns>
         [HttpGet]
         [UserAction]
-        public UserDTO Get(long id)
+        public async Task<UserDTO> Get(long id)
         {
-            return userService.User(id);
+            return await userService.UserAsync(id);
         }
 
         /// <summary>
@@ -147,6 +150,16 @@ namespace LinkServer.Controllers
         {
             model.Id = id;
             userService.UpdateUser(model);
+        }
+
+        [HttpPost("userImage")]
+        [UserAction]
+        public async Task UpdateUserImage(long id, 
+            [Required(ErrorMessage = "必须提供文件名后缀")]
+            [StringLength(8, MinimumLength = 2, ErrorMessage = "文件名后缀不合法")]string suffix, 
+            [Required(ErrorMessage = "必须提供文件")]IFormFile imageFile)
+        {
+            await userService.UpdateUserImageAsync(id, suffix, imageFile.OpenReadStream());
         }
     }
 }

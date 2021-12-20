@@ -1,38 +1,22 @@
 <script setup lang="ts">
-import { ref } from "@vue/reactivity";
-import axios from "axios";
-import { UserClient, UserDTO } from "../LinkClient";
+import ImageUploadModal from "./ImageUploadModal.vue";
+import JQuery from "jquery";
+import { inject } from "@vue/runtime-core";
+import { IUserStore } from "../Utils";
 
-const name = ref("");
-const id = ref(null);
-const email = ref();
+let userSore = inject<IUserStore>("userStore");
 
-const emites = defineEmits(["logout"]);
-
-const client = new UserClient();
-
-// userApi.apiUserGet().then((response) => {
-//   name.value = response.data.name;
-//   id.value = response.data.id;
-//   email.value = response.data.email;
-// });
-
-client.get(0).then((user: UserDTO) => {
-  name.value = user.name;
-  id.value = user.id;
-  email.value = user.email;
-});
-
-function onLogout() {
-  localStorage.removeItem("token");
-  axios.defaults.headers.common["Authorization"] = "";
-  emites("logout");
+function onImageUploadCancel() {
+  JQuery("#imageUploadModal").modal("hide");
 }
 
-const logoutConfirm = ref(false);
+function toggleLogoutConfirmModal(state: string) {
+  JQuery("#logoutConfirmModal").modal(state);
+}
 
-function showLogoutConfirm() {
-  logoutConfirm.value = true;
+function onLogout() {
+  toggleLogoutConfirmModal("hide");
+  userSore.logout();
 }
 </script>
 
@@ -40,75 +24,143 @@ function showLogoutConfirm() {
   <div>
     <div class="px-4 py-3">
       <div class="d-flex flex-column justify-content-center">
-        <svg
-          t="1636988377253"
-          class="icon align-self-center"
-          viewBox="0 0 1024 1024"
-          version="1.1"
-          xmlns="http://www.w3.org/2000/svg"
-          p-id="2875"
-          width="4em"
-          height="4em"
+        <div
+          class="
+            d-flex
+            align-self-center
+            rounded-circle
+            overflow-hidden
+            bg-dark
+          "
+          style="height: 4em; width: 4em"
         >
-          <path
-            d="M761.8 600.9c-64 57.6-147.2 96-243.2 96s-179.2-38.4-249.6-96C108.8 684.2 0 793 0 991.4H1024.2c0-198.4-108.8-300.8-262.4-390.5z m-249.7 19.2c160 0 288.1-134.4 288.1-294.5 0-160-128-294.5-288.1-294.5s-288 134.6-288 294.6c0 166.4 134.4 294.4 288 294.4z m0 0"
-            fill="#8a8a8a"
-            p-id="2876"
-          ></path>
-        </svg>
-        <span class="align-self-center">{{ name }}</span>
+          <img
+            alt=""
+            class="align-self-center img-fluid"
+            style="width: 4em; height: 4em"
+            :src="
+              userSore.image != undefined
+                ? userSore.image
+                : './src/assets/user.png'
+            "
+          />
+          <div
+            class="position-absolute"
+            style="
+              height: 4em;
+              width: 4em;
+              z-index: 2;
+              background-color: transparent;
+            "
+          >
+            <div
+              class="
+                w-100
+                h-100
+                rounded-circle
+                d-flex
+                flex-column
+                justify-content-end
+                image-box
+                small
+                text-center
+              "
+            >
+              <button
+                type="button"
+                class="btn text-light btn-sm"
+                data-toggle="modal"
+                data-target="#imageUploadModal"
+              >
+                编辑
+              </button>
+              <Teleport to="body">
+                <div
+                  class="modal fade"
+                  tabindex="-1"
+                  aria-hidden="true"
+                  id="imageUploadModal"
+                >
+                  <ImageUploadModal
+                    @close-event="onImageUploadCancel"
+                  ></ImageUploadModal>
+                </div>
+              </Teleport>
+            </div>
+          </div>
+        </div>
+        <span class="align-self-center">{{ userSore.name }}</span>
         <table class="table table-borderless table-sm mt-3">
           <tbody>
             <tr>
               <td align="right">id:</td>
-              <td>{{ id }}</td>
+              <td>{{ userSore.id }}</td>
             </tr>
             <tr>
               <td align="right">email:</td>
-              <td>{{ email }}</td>
+              <td>{{ userSore.email }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
     <div class="dropdown-divider"></div>
-    <button class="btn dropdown-item text-center" @click="showLogoutConfirm">
+    <button
+      class="btn dropdown-item text-center"
+      data-toggle="modal"
+      data-target="#logoutConfirmModal"
+    >
       登出
     </button>
 
-    <!-- Modal -->
-    <div class="position-fixed w-100 h-100 bg-translucent" v-if="logoutConfirm">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" @click="logoutConfirm = false">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">退出登录将无法享受某些功能，确定退出？</div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              @click="logoutConfirm = false"
-            >
-              取消
-            </button>
-            <button type="button" class="btn btn-primary" @click="onLogout">
-              确定
-            </button>
+    <Teleport to="body">
+      <div
+        class="modal fade"
+        tabindex="-1"
+        aria-hidden="true"
+        id="logoutConfirmModal"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button
+                type="button"
+                class="close"
+                @click="toggleLogoutConfirmModal('hide')"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">退出登录将无法享受某些功能，确定退出？</div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                @click="toggleLogoutConfirmModal('hide')"
+              >
+                取消
+              </button>
+              <button type="button" class="btn btn-primary" @click="onLogout">
+                确定
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
-.bg-translucent {
-  z-index: 3;
+.image-box {
+  color: transparent;
+  cursor: pointer;
+}
+
+.image-box:hover {
   background-color: #20202077;
-  left: 0%;
-  top: 0%;
+  color: aliceblue;
+  box-shadow: 0px 0px 5px #0f0f0fc0;
+  transition: 0.3s;
 }
 </style>

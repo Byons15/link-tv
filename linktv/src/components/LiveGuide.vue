@@ -1,32 +1,43 @@
 <script setup lang="ts">
 import { computed, ref } from "@vue/reactivity";
-import { watch, watchEffect } from "@vue/runtime-core";
+import { inject, onMounted, watch, watchEffect } from "@vue/runtime-core";
+import { nextTick } from "vue";
 import { LiveClient } from "../LinkClient";
+import { IUserStore } from "../Utils";
 
-const props = defineProps({
-  logined: Boolean,
-});
+const userStore = inject<IUserStore>("userStore");
 
 const pushUrl = ref("");
+const errorModal = inject<any>("errorModal");
 
-watch(
-  () => props.logined,
-  () => {
-    if (props.logined) {
-      // const api = new LiveApi();
-      // api.apiLiveAddressPushGet().then((response) => {
-      //   if (response.status != 200) return;
-      //   pushUrl.value = response.data;
-      // });
-      const live = new LiveClient();
-      live.pushAddress(0).then((address: string)=>{
+function updatePushAddress() {
+  if (userStore.logined) {
+    const live = new LiveClient();
+    live
+      .pushAddress(0)
+      .catch(() => {
+        errorModal.value.show();
+      })
+      .then((address: string) => {
         pushUrl.value = address;
       });
-    } else {
-      pushUrl.value = "";
-    }
+  } else {
+    pushUrl.value = "";
+  }
+}
+
+watch(
+  () => userStore.logined,
+  () => {
+    updatePushAddress();
   }
 );
+
+onMounted(() => {
+  nextTick(() => {
+    updatePushAddress();
+  });
+});
 
 const pushUrlElement = ref(null);
 
@@ -46,7 +57,7 @@ function onCopyPushUrl() {
   <div class="text-secondary">从其他推流软件，如OBS开始。</div>
   <div class="text-danger" v-if="pushUrl == ''">登录以获取推流地址</div>
   <div v-else>
-    <div class="text-secondary mb-2">复制以下推流地址到推流软件：</div>
+    <div class="text-secondary mb-2">复制以下推流地址到推流软件:</div>
     <div class="input-group">
       <input
         type="text"

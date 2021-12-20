@@ -1,33 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "@vue/reactivity";
 import Router from "../Router";
 import Login from "./Login.vue";
 import UserCard from "./UserCard.vue";
 import LiveGuide from "./LiveGuide.vue";
-import { nextTick, onMounted } from "@vue/runtime-core";
+import { inject, nextTick, onMounted } from "@vue/runtime-core";
+import { IUserStore } from "../Utils";
 
-const emites = defineEmits(["logined"]);
-
-const logined = ref(false);
-
-onMounted(()=>{
-  nextTick(()=>{
-    let token = localStorage.getItem("token");
-    if(token != null){
-      logined.value = true;
-      emites("logined");
-    }
-  });
-});
-
-function onLogined() {
-  emites("logined");
-  logined.value = true;
-}
-
-function onLogout() {
-  logined.value = false;
-}
+const userStore = inject<IUserStore>("userStore");
 
 </script>
 
@@ -109,7 +89,7 @@ function onLogout() {
           class="dropdown-menu dropdown-menu-right p-4"
           style="min-width: 20em"
         >
-          <LiveGuide :logined="logined"></LiveGuide>
+          <LiveGuide></LiveGuide>
         </div>
       </div>
 
@@ -139,10 +119,16 @@ function onLogout() {
           </svg>
         </button>
         <div class="dropdown-menu dropdown-menu-right">
-          <Login @logined="onLogined" @logout="onLogout" v-if="!logined"></Login>
-          <UserCard v-else @logout="onLogout"></UserCard>
+          <Login
+            v-if="!(userStore.logined)"
+          ></Login>
+          <UserCard
+            v-else
+          ></UserCard>
         </div>
       </div>
+    </div>
+    <div>
     </div>
   </nav>
 </template>

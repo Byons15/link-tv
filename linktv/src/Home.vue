@@ -3,8 +3,16 @@ import { ref } from "@vue/reactivity";
 import Telecasts from "./components/Telecasts.vue";
 import Navbar from "./components/navbar.vue";
 
+import { nextTick, onMounted } from "@vue/runtime-core";
+
 const playerWidescreen = ref(false);
 const topTV = ref(true);
+
+onMounted(()=>{
+  nextTick(()=>{
+    
+  });
+});
 
 </script>
 

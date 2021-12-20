@@ -79,7 +79,6 @@ function onVolumeChange(newVol){
 };
 
 onBeforeUnmount(() => {
-  danmakuView.destroy();
   erd.uninstall();
 });
 
@@ -159,7 +158,7 @@ function onControlMouseLeave(){
   <div>
     <div
       ref="playerContainerElement"
-      class="w-100 h-100"
+      class="w-100 h-100 overflow-hidden"
       :class="{ 'page-fullscreen': pageFullscreen }"
       :style="{ position: pageFullscreen ? 'fixed' : 'relative' }"
     >

@@ -2,25 +2,27 @@
 import { ref } from "@vue/reactivity";
 import Router from "../Router";
 import axios, { AxiosResponse } from "axios";
-import { nextTick, onBeforeUpdate, onMounted } from "@vue/runtime-core";
-import { IInternalErrorDescription, IInvalidModelDescription, Login, UserClient } from "../LinkClient";
-import { DelayAction } from "../DelayAction";
-
-const emits = defineEmits(["logined"]);
+import { inject, nextTick, onBeforeUpdate, onMounted } from "@vue/runtime-core";
+import {
+  IInternalErrorDescription,
+  IInvalidModelDescription,
+  Login,
+  UserClient,
+} from "../LinkClient";
+import * as Utils from "../Utils";
 
 const userClient = new UserClient();
 
 const userName = ref("");
 const password = ref("");
 
+const userStore = inject<Utils.IUserStore>("userStore");
+const errorModal = inject<any>("errorModal");
+
 onMounted(() => {
   nextTick(() => {
-    if (localStorage.getItem("token") != null) {
-      axios.defaults.headers.common["Authorization"] =
-        "Bearer " + localStorage.getItem("token");
-
-      emits("logined");
-    }
+    if(userStore.logined)
+      throw "使用登录面板前请先注销";
   });
 });
 
@@ -41,27 +43,26 @@ function onLogin() {
   userClient
     .login(<Login>{
       name: userName.value,
-      password: password.value
+      password: password.value,
     })
-    .then((response:string) => {
-      axios.defaults.headers.common["Authorization"] = "Bearer "+ response;
-      localStorage.setItem("token", response);
-      emits("logined");
+    .then((response: string) => {
+      userStore.login(response);
     })
     .catch((response: IInvalidModelDescription) => {
-        
-        if(response.errors['Name'] !== undefined){
-          invalidName.value = true;
-          invalidNameDesc.value = response.errors['Name'][0];
-        }
+      console.log(response);
+      if (response.errors["Name"] !== undefined) {
+        invalidName.value = true;
+        invalidNameDesc.value = response.errors["Name"][0];
+      }
 
-        if(response.errors['Password'] !== undefined)
-        {
-          invalidPassword.value = true;
-          invalidPasswordDesc.value = response.errors["Password"][0];
-        }
-    }).catch((internalError: IInternalErrorDescription)=>{
-      
+      if (response.errors["Password"] !== undefined) {
+        invalidPassword.value = true;
+        invalidPasswordDesc.value = response.errors["Password"][0];
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      errorModal.value.show();
     })
     .finally(() => {
       logging.value = false;

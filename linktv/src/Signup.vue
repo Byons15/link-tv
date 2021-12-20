@@ -7,6 +7,12 @@ import {
   UserClient,
   UserCore,
 } from "./LinkClient";
+import axios from "axios";
+import { inject } from "@vue/runtime-core";
+import { IUserStore } from "./Utils";
+
+const errorModal = inject<any>("errorModal");
+const userStore = inject<IUserStore>("userStore");
 
 const userName = ref("");
 const userNameInvalidMsg = ref("");
@@ -31,6 +37,9 @@ function onUserNameBlur() {
   let userClient = new UserClient();
   userClient.validName(userName.value).then((available: boolean) => {
     userNameInvalidMsg.value = available ? "" : "用户名已经存在";
+  }).catch((error : IInvalidModelDescription)=>{
+    if(error.errors.name !== undefined)
+      userNameInvalidMsg.value = error.errors.name[0];
   });
 }
 
@@ -121,7 +130,10 @@ function submit() {
       emailAuthCode: emailAuthCode.value,
       password: password.value,
     })
-    .then((token: string) => {})
+    .then((token: string) => {
+      userStore.login(token);
+      Router.push("/home");
+    })
     .catch((invalidResponse: IInvalidModelDescription) => {
       const errors = invalidResponse.errors;
 
@@ -136,6 +148,9 @@ function submit() {
 
       passwordInvalidMsg.value =
         errors["Password"] !== undefined ? errors["Password"][0] : '';
+    })
+    .catch(()=>{
+      errorModal.value.show();
     });
 }
 

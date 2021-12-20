@@ -13,22 +13,6 @@ var flvPlayer: FlvJs.Player;
 const videoElement = ref<HTMLVideoElement>();
 const unSupported = ref<boolean>(false);
 
-onMounted(() => {
-  nextTick(() => {
-    if (FlvJs.isSupported()) {
-      flvPlayer = FlvJs.createPlayer({
-        type: "flv",
-        url: props.video_src,
-      });
-      flvPlayer.attachMediaElement(videoElement.value);
-      flvPlayer.load();
-      flvPlayer.volume = props.volume;
-    } else {
-      unSupported.value = true;
-    }
-  });
-});
-
 watch(
   () => props.video_src,
   () => {
@@ -49,13 +33,6 @@ watch(
 );
 
 watch(
-  () => props.volume,
-  () => {
-    flvPlayer.volume = props.volume;
-  }
-);
-
-watch(
   () => props.playing,
   () => {
     if(props.playing)
@@ -71,8 +48,8 @@ onBeforeUnmount(() => {});
 </script>
 
 <template>
-  <div class="w-100 h-100 m-auto">
-    <video class="w-100 m-0" style="min-height:100%; z-index: 1;" ref="videoElement"></video>
+  <div class="w-100 h-100 m-auto" style="background-color: black;">
+    <video :volume="volume" class="w-100 m-0" style="min-height:100%; z-index: 1;" ref="videoElement"></video>
     <div
       class="position-absolute w-100 h-100 bg-dark"
       style="left: 0%; right: 0%; top: 0%; bottom: 0%; min-width: 100%; min-height: 100%; z-index: 5"
